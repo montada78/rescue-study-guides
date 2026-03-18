@@ -8,8 +8,8 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="shortcut icon" href="/favicon.svg">
   
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS (local build - fast!) -->
+  <link href="/css/tailwind.css" rel="stylesheet">
   
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -20,34 +20,7 @@
   <!-- Custom CSS -->
   <link href="/css/style.css" rel="stylesheet">
   
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            rescue: {
-              red: '#E63946',
-              'red-dark': '#C1121F',
-              'red-light': '#FF6B6B',
-              white: '#FFFFFF',
-              cream: '#FFF5F5',
-              dark: '#1A1A2E',
-              gray: '#F8F9FA',
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Poppins', 'sans-serif'],
-          },
-          animation: {
-            'float': 'float 3s ease-in-out infinite',
-            'pulse-slow': 'pulse 3s ease-in-out infinite',
-            'spin-slow': 'spin 8s linear infinite',
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Tailwind config applied via local CSS build -->
 </head>
 <body class="bg-white font-sans">
   <!-- Top Banner -->

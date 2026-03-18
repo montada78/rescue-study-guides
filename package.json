@@ -6,10 +6,18 @@
   "scripts": {
     "start": "NODE_ENV=production node app.js",
     "dev": "NODE_ENV=development node app.js",
+    "build:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/tailwind.css --minify",
+    "watch:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/tailwind.css --watch",
     "setup": "node database/db.js",
     "test": "echo \"No tests yet\" && exit 0"
   },
-  "keywords": ["study", "guides", "igcse", "ap", "education"],
+  "keywords": [
+    "study",
+    "guides",
+    "igcse",
+    "ap",
+    "education"
+  ],
   "author": "Rescue Study Guides",
   "license": "ISC",
   "engines": {
@@ -31,5 +39,11 @@
     "multer": "^2.1.1",
     "sqlite3": "^6.0.1",
     "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19"
   }
 }

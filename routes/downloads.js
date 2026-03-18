@@ -17,7 +17,7 @@ router.get('/', requireAuth, (req, res) => {
     ORDER BY d.created_at DESC
   `).all(req.session.user.id);
 
-  res.render('downloads', { title: 'My Downloads - Rescue Study Guides', downloads });
+  res.render('account/downloads', { title: 'My Downloads - Rescue Study Guides', downloads });
 });
 
 // DOWNLOAD FILE
