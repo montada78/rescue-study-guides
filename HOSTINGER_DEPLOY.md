@@ -1,205 +1,130 @@
 # 🚀 Rescue Study Guides — Hostinger Deployment Guide
 
-## ✅ Pre-Deployment Checklist
-
-Before uploading, make sure you have:
-- [ ] A Hostinger VPS or Business Hosting plan (Node.js required)
-- [ ] SSH access to your Hostinger server
-- [ ] Node.js 18+ installed on server
-- [ ] A domain pointed to Hostinger (rescuestudyguides.com)
-
----
-
-## 📦 Step 1 — Upload Files to Hostinger
-
-### Option A: File Manager (Hostinger hPanel)
-1. Log into hPanel → File Manager
-2. Navigate to `public_html/` (or your domain folder)
-3. Upload `rescuestudyguides.zip`
-4. Extract the zip — all files should be in the domain root
-5. Delete the zip after extraction
-
-### Option B: FTP (FileZilla)
-1. Use your Hostinger FTP credentials
-2. Upload all project files to `public_html/`
-
-### Option C: SSH (Recommended)
-```bash
-# On your LOCAL machine — upload the zip
-scp rescuestudyguides.zip user@yourserver.com:/home/user/public_html/
-
-# SSH into server
-ssh user@yourserver.com
-
-# Navigate and extract
-cd /home/user/public_html/
-unzip rescuestudyguides.zip
-```
+## 📁 What's Included
+- Full Node.js Express web application
+- SQLite database (auto-created on first run)
+- User authentication (login/register)
+- Online store with product management
+- Downloadable PDF system
+- Admin panel at `/admin`
+- Beautiful Gen Z-styled frontend
 
 ---
 
-## ⚙️ Step 2 — Configure Environment Variables
+## 🖥️ Hostinger Setup (Node.js Hosting)
 
-Edit the `.env` file on the server:
+### Step 1: Upload Files
+1. Log into Hostinger Control Panel (hPanel)
+2. Go to **File Manager** or use **FTP** (FileZilla)
+3. Navigate to your domain's folder (e.g., `public_html` or a subdirectory)
+4. Upload ALL files EXCEPT `node_modules/` and `database/*.db`
 
+### Step 2: Set Node.js App in hPanel
+1. Go to **Websites → Manage → Node.js**
+2. Set **Node.js version**: 18.x or higher
+3. Set **Application root**: `/public_html` (or your folder)
+4. Set **Application URL**: your domain
+5. Set **Application startup file**: `app.js`
+6. Click **Create**
+
+### Step 3: Install Dependencies
+In the Node.js terminal in hPanel (or SSH):
 ```bash
-nano .env
-```
-
-Change these values:
-```env
-PORT=3000
-NODE_ENV=production
-SESSION_SECRET=your-super-long-random-secret-string-change-this-now!
-DB_PATH=./database/rescuestudyguides.db
-ADMIN_EMAIL=your-admin@email.com
-ADMIN_PASSWORD=YourSecureAdminPassword123!
-APP_URL=https://www.rescuestudyguides.com
-```
-
-> ⚠️ **IMPORTANT**: Change `SESSION_SECRET` to a long random string (50+ characters)
-> ⚠️ **IMPORTANT**: Change `ADMIN_EMAIL` and `ADMIN_PASSWORD` before first launch
-
----
-
-## 📦 Step 3 — Install Dependencies
-
-```bash
-cd /home/user/public_html/
+cd /home/username/public_html
 npm install --production
 ```
 
----
-
-## 🗃️ Step 4 — Initialize Database
-
-The database auto-initializes on first start, but you can also run manually:
-
-```bash
-node database/db.js
+### Step 4: Set Environment Variables
+In hPanel Node.js settings, add these environment variables:
+```
+NODE_ENV=production
+PORT=3000
+SESSION_SECRET=your-super-secret-key-change-this-to-something-random
+DB_PATH=./database/rescuestudyguides.db
+ADMIN_EMAIL=your-admin@email.com
+ADMIN_PASSWORD=YourSecureAdminPassword123!
+APP_NAME=Rescue Study Guides
+APP_URL=https://www.rescuestudyguides.com
 ```
 
----
-
-## 🚀 Step 5 — Start the Application
-
-### Using PM2 (Recommended for Hostinger VPS):
+### Step 5: Create Required Directories
 ```bash
-# Install PM2 globally if not installed
-npm install -g pm2
-
-# Start the app
-pm2 start ecosystem.config.js --env production
-
-# Save PM2 config so it restarts on server reboot
-pm2 save
-pm2 startup
+mkdir -p database
+mkdir -p public/uploads/guides
+mkdir -p public/uploads/images
 ```
 
-### Using Hostinger Node.js Manager (hPanel):
-1. Go to hPanel → Websites → your domain
-2. Click **Node.js** in the sidebar
-3. Set **Entry Point**: `app.js`
-4. Set **Node.js Version**: 18.x or 20.x
-5. Click **Start**
+### Step 6: Start the App
+In hPanel Node.js panel, click **Start** or **Restart**
 
 ---
 
-## 🌐 Step 6 — Configure Domain & SSL
-
-In hPanel:
-1. Go to **SSL/TLS** → Enable **Free SSL** (Let's Encrypt)
-2. Go to **DNS** → Point A record to your server IP
-3. Enable **Force HTTPS** redirect
+## 🔐 Admin Panel Access
+- **URL**: `https://yourdomain.com/admin`
+- **Email**: Set in environment variables (`ADMIN_EMAIL`)
+- **Password**: Set in environment variables (`ADMIN_PASSWORD`)
 
 ---
 
-## 🔐 Step 7 — First Login
+## 📤 Uploading Study Guide PDFs
+1. Login as admin
+2. Go to `/admin/products/new`
+3. Fill in guide details
+4. Upload your PDF file (up to 200MB)
+5. Upload a cover image
+6. Click **Publish Guide**
 
-Once running, visit:
-- **Site**: https://www.rescuestudyguides.com
-- **Admin**: https://www.rescuestudyguides.com/admin
-
-Login with the credentials from your `.env` file.
-
-**First things to do in Admin Panel:**
-1. Add real product cover images
-2. Upload PDF study guide files
-3. Update product descriptions
-4. Check the Orders dashboard
+Students can then purchase/download from their account.
 
 ---
 
-## 📂 Upload Study Guide PDFs
-
-1. Go to `/admin/products/new` or edit an existing product
-2. Upload the PDF file (max 200MB)
-3. Uploaded files are stored in `public/uploads/guides/`
-4. Files are served securely — students can only download guides they purchased
+## 🗃️ Database
+- SQLite is used (no MySQL setup needed!)
+- Database auto-creates on first run
+- Located at `./database/rescuestudyguides.db`
+- Backup this file regularly!
 
 ---
 
-## 🛠️ Maintenance Commands
+## 📧 Email Setup (Optional - for password reset)
+To enable real email, add to environment variables:
+```
+SMTP_HOST=smtp.hostinger.com
+SMTP_PORT=587
+SMTP_USER=hello@rescuestudyguides.com
+SMTP_PASS=your-email-password
+```
+Then install nodemailer: `npm install nodemailer`
 
+---
+
+## 💳 Payment Integration (Production)
+The current checkout is a demo. To add real payments:
+- **Stripe**: Install `stripe` package and add `STRIPE_SECRET_KEY`
+- **PayPal**: Install `paypal-rest-sdk` and add PayPal credentials
+
+---
+
+## 🔄 Restart App
+If you make changes, restart via hPanel Node.js panel or SSH:
 ```bash
-# View logs
-pm2 logs rescue-study-guides
-
-# Restart app
 pm2 restart rescue-study-guides
-
-# Update app (after file changes)
-pm2 reload rescue-study-guides
-
-# View status
-pm2 status
-
-# Stop app
-pm2 stop rescue-study-guides
+# OR
+node app.js
 ```
 
 ---
 
-## 🔧 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| App won't start | Check `pm2 logs` for errors |
-| Can't login | Check `.env` ADMIN_EMAIL/ADMIN_PASSWORD |
-| Downloads not working | Ensure `public/uploads/guides/` is writable |
-| 502 Bad Gateway | App crashed — run `pm2 restart rescue-study-guides` |
-| Database errors | Delete `database/*.db` files and restart to re-seed |
+## 📞 Support
+For help: hello@rescuestudyguides.com
 
 ---
 
-## 📊 Project Structure
-
-```
-rescuestudyguides/
-├── app.js              # Main application entry point
-├── .env                # Environment variables (KEEP SECRET!)
-├── .htaccess           # Apache proxy config
-├── ecosystem.config.js # PM2 configuration
-├── database/
-│   └── db.js           # Database setup & seed data
-├── routes/
-│   ├── store.js        # Homepage, shop, product pages
-│   ├── auth.js         # Login, register, logout
-│   ├── cart.js         # Cart & checkout
-│   ├── downloads.js    # File download handler
-│   ├── account.js      # User account pages
-│   └── admin.js        # Admin panel
-├── views/              # EJS templates
-├── public/
-│   ├── css/style.css   # Custom styles
-│   ├── js/main.js      # Frontend JavaScript
-│   └── uploads/        # Uploaded PDFs & images
-└── middleware/
-    └── auth.js         # Authentication middleware
-```
+## 🌐 Domain Setup
+1. Point your domain DNS to Hostinger nameservers
+2. Add SSL certificate (free with Hostinger)
+3. Update `APP_URL` environment variable to your domain
 
 ---
 
-## 💬 Support
-
-Need help? Email: hello@rescuestudyguides.com
+*Built with ❤️ for Rescue Study Guides — Rescue Your Exam Results!*
