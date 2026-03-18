@@ -1,0 +1,56 @@
+<!-- MY DOWNLOADS PAGE -->
+<div class="min-h-screen bg-gray-50">
+  <div class="page-hero">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="font-display font-black text-4xl mb-1">📥 My Downloads</h1>
+      <p class="text-white/70">All your purchased & free study guides in one place</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <% if (downloads.length === 0) { %>
+    <div class="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
+      <div class="text-7xl mb-4">📚</div>
+      <h3 class="font-display font-bold text-xl text-gray-700 mb-2">No guides yet!</h3>
+      <p class="text-gray-500 mb-6">Purchase guides to see them here</p>
+      <a href="/shop" class="btn-rescue">Browse Guides</a>
+    </div>
+    <% } else { %>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <% downloads.forEach(dl => { %>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all">
+        <div class="h-32 flex items-center justify-center text-5xl" style="background: linear-gradient(135deg, <%= dl.category_color || '#E63946' %>22, <%= dl.category_color || '#E63946' %>44);">
+          <%= dl.subject === 'Mathematics' ? '🔢' : dl.subject === 'Biology' ? '🧬' : dl.subject === 'Chemistry' ? '⚗️' : dl.subject === 'Physics' ? '⚡' : '📚' %>
+        </div>
+        <div class="p-4">
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full text-white mb-2 inline-block" style="background: <%= dl.category_color || '#E63946' %>"><%= dl.category_name %></span>
+          <h3 class="font-display font-bold text-sm text-gray-800 mb-1 line-clamp-2"><%= dl.title %></h3>
+          <p class="text-xs text-gray-500 mb-3"><%= dl.level %> • <%= dl.curriculum %> • <%= dl.pages %> pages</p>
+
+          <div class="mb-3">
+            <div class="flex justify-between text-xs text-gray-400 mb-1">
+              <span>Downloads used</span>
+              <span><%= dl.download_count %>/<%= dl.max_downloads %></span>
+            </div>
+            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-rescue-red rounded-full transition-all" style="width: <%= Math.min((dl.download_count/dl.max_downloads)*100, 100) %>%"></div>
+            </div>
+          </div>
+
+          <% if (dl.download_count < dl.max_downloads) { %>
+          <a href="/downloads/file/<%= dl.download_token %>" 
+             class="block w-full text-center bg-rescue-red text-white py-2.5 rounded-xl font-bold text-sm hover:bg-rescue-red-dark transition-all">
+            <i class="fas fa-download mr-1.5"></i>Download PDF
+          </a>
+          <% } else { %>
+          <div class="bg-gray-100 text-gray-500 text-center py-2.5 rounded-xl text-sm font-medium">
+            Limit Reached — Contact Support
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</div>

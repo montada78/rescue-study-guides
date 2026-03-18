@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <meta name="description" content="Rescue Study Guides - High-quality, colorful revision guides for IGCSE, AP, SABIS and more. Rescue your exam results today!">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="shortcut icon" href="/favicon.svg">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link href="/css/style.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rescue: {
+              red: '#E63946',
+              'red-dark': '#C1121F',
+              'red-light': '#FF6B6B',
+              white: '#FFFFFF',
+              cream: '#FFF5F5',
+              dark: '#1A1A2E',
+              gray: '#F8F9FA',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Poppins', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s ease-in-out infinite',
+            'spin-slow': 'spin 8s linear infinite',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white font-sans">
+  <!-- Top Banner -->
+  <div class="bg-rescue-red text-white text-center py-2 px-4 text-sm font-medium">
+    🚨 <strong>EXAM SEASON SALE!</strong> Get 30% OFF all guides with code <strong>RESCUE30</strong> | Free guides available! 🎓
+  </div>
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg sticky top-0 z-50 border-b-4 border-rescue-red">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        
+        <!-- Logo -->
+        <a href="/" class="flex items-center space-x-3 group">
+          <div class="relative">
+            <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="group-hover:scale-110 transition-transform">
+              <circle cx="50" cy="50" r="48" fill="none" stroke="#E63946" stroke-width="4"/>
+              <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="#E63946"/>
+              <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="#E63946"/>
+              <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="#E63946"/>
+              <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="#E63946"/>
+              <circle cx="50" cy="50" r="18" fill="white"/>
+              <text x="50" y="56" text-anchor="middle" font-size="14" font-weight="bold" fill="#E63946" font-family="Poppins,sans-serif">RSG</text>
+              <!-- Rope lines -->
+              <line x1="50" y1="2" x2="50" y2="22" stroke="white" stroke-width="2"/>
+              <line x1="98" y1="50" x2="78" y2="50" stroke="white" stroke-width="2"/>
+              <line x1="50" y1="98" x2="50" y2="78" stroke="white" stroke-width="2"/>
+              <line x1="2" y1="50" x2="22" y2="50" stroke="white" stroke-width="2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="font-display font-black text-xl text-rescue-red leading-none">RESCUE</div>
+            <div class="font-display font-semibold text-xs text-gray-600 tracking-widest leading-none">STUDY GUIDES</div>
+          </div>
+        </a>
+
+        <!-- Desktop Nav Links -->
+        <div class="hidden md:flex items-center space-x-6">
+          <a href="/" class="text-gray-700 hover:text-rescue-red font-medium transition-colors">Home</a>
+          <a href="/shop" class="text-gray-700 hover:text-rescue-red font-medium transition-colors">Shop</a>
+          <a href="/about" class="text-gray-700 hover:text-rescue-red font-medium transition-colors">About</a>
+          <a href="/how-it-works" class="text-gray-700 hover:text-rescue-red font-medium transition-colors">How It Works</a>
+          <a href="/contact" class="text-gray-700 hover:text-rescue-red font-medium transition-colors">Contact</a>
+        </div>
+
+        <!-- Right Nav -->
+        <div class="flex items-center space-x-3">
+          <!-- Search -->
+          <button onclick="toggleSearch()" class="p-2 text-gray-600 hover:text-rescue-red transition-colors">
+            <i class="fas fa-search text-lg"></i>
+          </button>
+
+          <% if (isLoggedIn) { %>
+            <!-- Cart -->
+            <a href="/cart" class="relative p-2 text-gray-600 hover:text-rescue-red transition-colors">
+              <i class="fas fa-shopping-cart text-lg"></i>
+              <% if (cartCount > 0) { %>
+                <span class="absolute -top-1 -right-1 bg-rescue-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"><%= cartCount %></span>
+              <% } %>
+            </a>
+            
+            <!-- User Menu -->
+            <div class="relative" id="userMenu">
+              <button onclick="toggleUserMenu()" class="flex items-center space-x-2 bg-rescue-cream border-2 border-rescue-red rounded-full px-3 py-1.5 hover:bg-rescue-red hover:text-white transition-all group">
+                <div class="w-7 h-7 rounded-full bg-rescue-red text-white flex items-center justify-center text-xs font-bold group-hover:bg-white group-hover:text-rescue-red transition-all">
+                  <%= user.name.charAt(0).toUpperCase() %>
+                </div>
+                <span class="text-sm font-semibold text-rescue-red group-hover:text-white transition-colors hidden sm:block"><%= user.name.split(' ')[0] %></span>
+                <i class="fas fa-chevron-down text-xs text-rescue-red group-hover:text-white transition-colors"></i>
+              </button>
+              
+              <div id="userDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                <div class="px-4 py-2 border-b border-gray-100">
+                  <p class="font-semibold text-gray-800 text-sm"><%= user.name %></p>
+                  <p class="text-gray-500 text-xs truncate"><%= user.email %></p>
+                </div>
+                <a href="/account" class="flex items-center px-4 py-2.5 hover:bg-rescue-cream text-sm text-gray-700 hover:text-rescue-red transition-colors">
+                  <i class="fas fa-tachometer-alt w-5 mr-2 text-rescue-red"></i> Dashboard
+                </a>
+                <a href="/account/downloads" class="flex items-center px-4 py-2.5 hover:bg-rescue-cream text-sm text-gray-700 hover:text-rescue-red transition-colors">
+                  <i class="fas fa-download w-5 mr-2 text-rescue-red"></i> My Downloads
+                </a>
+                <a href="/account/orders" class="flex items-center px-4 py-2.5 hover:bg-rescue-cream text-sm text-gray-700 hover:text-rescue-red transition-colors">
+                  <i class="fas fa-receipt w-5 mr-2 text-rescue-red"></i> My Orders
+                </a>
+                <a href="/account/wishlist" class="flex items-center px-4 py-2.5 hover:bg-rescue-cream text-sm text-gray-700 hover:text-rescue-red transition-colors">
+                  <i class="fas fa-heart w-5 mr-2 text-rescue-red"></i> Wishlist
+                </a>
+                <a href="/account/profile" class="flex items-center px-4 py-2.5 hover:bg-rescue-cream text-sm text-gray-700 hover:text-rescue-red transition-colors">
+                  <i class="fas fa-cog w-5 mr-2 text-rescue-red"></i> Settings
+                </a>
+                <% if (isAdmin) { %>
+                <div class="border-t border-gray-100 mt-1 pt-1">
+                  <a href="/admin" class="flex items-center px-4 py-2.5 hover:bg-red-50 text-sm text-rescue-red font-semibold transition-colors">
+                    <i class="fas fa-shield-alt w-5 mr-2"></i> Admin Panel
+                  </a>
+                </div>
+                <% } %>
+                <div class="border-t border-gray-100 mt-1 pt-1">
+                  <a href="/auth/logout" class="flex items-center px-4 py-2.5 hover:bg-red-50 text-sm text-gray-600 hover:text-rescue-red transition-colors">
+                    <i class="fas fa-sign-out-alt w-5 mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/auth/login" class="text-gray-700 hover:text-rescue-red font-medium text-sm transition-colors">Login</a>
+            <a href="/auth/register" class="bg-rescue-red text-white px-4 py-2 rounded-xl font-semibold text-sm hover:bg-rescue-red-dark transition-all hover:scale-105 shadow-md">
+              Join Free 🚀
+            </a>
+          <% } %>
+
+          <!-- Mobile menu button -->
+          <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-600 hover:text-rescue-red">
+            <i class="fas fa-bars text-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Bar (Hidden by default) -->
+    <div id="searchBar" class="hidden border-t border-gray-200 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <form action="/shop" method="GET" class="flex items-center">
+          <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" name="search" placeholder="Search for study guides... (e.g., IGCSE Maths, AP Chemistry)"
+              class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-rescue-red outline-none text-sm transition-colors"
+              autofocus>
+          </div>
+          <button type="submit" class="ml-3 bg-rescue-red text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-rescue-red-dark transition-colors">
+            Search
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden border-t border-gray-200 bg-white">
+      <div class="px-4 py-4 space-y-2">
+        <a href="/" class="block px-4 py-2.5 rounded-xl hover:bg-rescue-cream text-gray-700 hover:text-rescue-red font-medium">🏠 Home</a>
+        <a href="/shop" class="block px-4 py-2.5 rounded-xl hover:bg-rescue-cream text-gray-700 hover:text-rescue-red font-medium">🛒 Shop</a>
+        <a href="/about" class="block px-4 py-2.5 rounded-xl hover:bg-rescue-cream text-gray-700 hover:text-rescue-red font-medium">ℹ️ About</a>
+        <a href="/how-it-works" class="block px-4 py-2.5 rounded-xl hover:bg-rescue-cream text-gray-700 hover:text-rescue-red font-medium">❓ How It Works</a>
+        <a href="/contact" class="block px-4 py-2.5 rounded-xl hover:bg-rescue-cream text-gray-700 hover:text-rescue-red font-medium">📧 Contact</a>
+        <% if (!isLoggedIn) { %>
+          <div class="pt-2 border-t border-gray-100 space-y-2">
+            <a href="/auth/login" class="block text-center px-4 py-2.5 rounded-xl border-2 border-rescue-red text-rescue-red font-semibold">Login</a>
+            <a href="/auth/register" class="block text-center px-4 py-2.5 rounded-xl bg-rescue-red text-white font-semibold">Join Free 🚀</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  <% if (success) { %>
+  <div class="fixed top-20 right-4 z-50 max-w-sm" id="flashSuccess">
+    <div class="bg-green-50 border-l-4 border-green-500 rounded-xl p-4 shadow-lg flex items-start space-x-3">
+      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-check text-green-600 text-sm"></i>
+      </div>
+      <div>
+        <p class="text-green-800 font-medium text-sm"><%= success %></p>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-green-500 hover:text-green-700">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (error) { %>
+  <div class="fixed top-20 right-4 z-50 max-w-sm" id="flashError">
+    <div class="bg-red-50 border-l-4 border-rescue-red rounded-xl p-4 shadow-lg flex items-start space-x-3">
+      <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-exclamation text-rescue-red text-sm"></i>
+      </div>
+      <div>
+        <p class="text-red-800 font-medium text-sm"><%= error %></p>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-red-400 hover:text-red-600">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Main Content -->
+  <main>
+    <%- body %>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-rescue-dark text-white mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        
+        <!-- Brand -->
+        <div class="lg:col-span-1">
+          <div class="flex items-center space-x-3 mb-4">
+            <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="48" fill="none" stroke="#E63946" stroke-width="4"/>
+              <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="#E63946"/>
+              <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="#E63946"/>
+              <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="#E63946"/>
+              <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="#E63946"/>
+              <circle cx="50" cy="50" r="18" fill="white"/>
+              <text x="50" y="56" text-anchor="middle" font-size="14" font-weight="bold" fill="#E63946" font-family="Poppins,sans-serif">RSG</text>
+            </svg>
+            <div>
+              <div class="font-display font-black text-lg text-rescue-red leading-none">RESCUE</div>
+              <div class="font-display font-semibold text-xs text-gray-400 tracking-widest">STUDY GUIDES</div>
+            </div>
+          </div>
+          <p class="text-gray-400 text-sm leading-relaxed mb-4">
+            From "I Don't Get It" to "I Ace It" — high-quality, colorful study guides that rescue students worldwide.
+          </p>
+          <div class="flex space-x-3">
+            <a href="#" class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-rescue-red transition-colors">
+              <i class="fab fa-instagram text-sm"></i>
+            </a>
+            <a href="#" class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-rescue-red transition-colors">
+              <i class="fab fa-tiktok text-sm"></i>
+            </a>
+            <a href="#" class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-rescue-red transition-colors">
+              <i class="fab fa-youtube text-sm"></i>
+            </a>
+            <a href="#" class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-rescue-red transition-colors">
+              <i class="fab fa-twitter text-sm"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="font-display font-bold text-white mb-4">Quick Links</h4>
+          <ul class="space-y-2.5">
+            <li><a href="/shop" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Shop All Guides</a></li>
+            <li><a href="/shop?free=1" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Free Guides</a></li>
+            <li><a href="/about" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>About Us</a></li>
+            <li><a href="/how-it-works" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>How It Works</a></li>
+            <li><a href="/contact" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Subjects -->
+        <div>
+          <h4 class="font-display font-bold text-white mb-4">Subjects</h4>
+          <ul class="space-y-2.5">
+            <li><a href="/shop?category=mathematics" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><span class="mr-2">🔢</span>Mathematics</a></li>
+            <li><a href="/shop?category=chemistry" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><span class="mr-2">⚗️</span>Chemistry</a></li>
+            <li><a href="/shop?category=biology" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><span class="mr-2">🧬</span>Biology</a></li>
+            <li><a href="/shop?category=physics" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><span class="mr-2">⚡</span>Physics</a></li>
+            <li><a href="/shop?category=english" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><span class="mr-2">📖</span>English</a></li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div>
+          <h4 class="font-display font-bold text-white mb-4">Support</h4>
+          <ul class="space-y-2.5 mb-6">
+            <li><a href="/contact" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Help Center</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Refund Policy</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Privacy Policy</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors flex items-center"><i class="fas fa-chevron-right text-rescue-red text-xs mr-2"></i>Terms of Service</a></li>
+          </ul>
+          <div class="bg-gray-800 rounded-xl p-4">
+            <p class="text-xs text-gray-400 mb-1">Need help? Email us:</p>
+            <a href="mailto:hello@rescuestudyguides.com" class="text-rescue-red font-medium text-sm">hello@rescuestudyguides.com</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-500 text-sm">© 2024 Rescue Study Guides. All rights reserved.</p>
+        <p class="text-gray-500 text-sm mt-2 md:mt-0">Made with ❤️ for students worldwide 🌍</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="/js/main.js"></script>
+  <script>
+    function toggleSearch() {
+      document.getElementById('searchBar').classList.toggle('hidden');
+    }
+    function toggleUserMenu() {
+      document.getElementById('userDropdown').classList.toggle('hidden');
+    }
+    function toggleMobileMenu() {
+      document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      const userMenu = document.getElementById('userMenu');
+      if (userMenu && !userMenu.contains(e.target)) {
+        document.getElementById('userDropdown')?.classList.add('hidden');
+      }
+    });
+    // Auto-dismiss flash messages
+    setTimeout(() => {
+      document.getElementById('flashSuccess')?.remove();
+      document.getElementById('flashError')?.remove();
+    }, 5000);
+  </script>
+</body>
+</html>

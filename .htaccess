@@ -1,0 +1,23 @@
+# Hostinger Node.js App - Apache Proxy Config
+# This proxies all requests to the Node.js app running on port 3000
+
+Options -MultiViews
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Proxy to Node.js
+RewriteRule ^$ http://localhost:3000/ [P,L]
+RewriteRule ^(.*) http://localhost:3000/$1 [P,L]
+
+# Security headers
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Cache static assets
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf)$">
+  Header set Cache-Control "max-age=86400, public"
+</FilesMatch>

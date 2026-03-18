@@ -1,0 +1,321 @@
+/* =============================================
+   RESCUE STUDY GUIDES - Custom Styles
+   ============================================= */
+
+:root {
+  --rescue-red: #E63946;
+  --rescue-red-dark: #C1121F;
+  --rescue-red-light: #FF6B6B;
+  --rescue-dark: #1A1A2E;
+  --rescue-cream: #FFF5F5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ---- HERO ANIMATIONS ---- */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+@keyframes floatDelay {
+  0%, 100% { transform: translateY(0px) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.float-anim { animation: float 3s ease-in-out infinite; }
+.float-anim-delay { animation: floatDelay 4s ease-in-out infinite; }
+.spin-slow { animation: spin-slow 12s linear infinite; }
+.gradient-animated {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* ---- HERO SECTION ---- */
+.hero-gradient {
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 40%, #fff0f0 100%);
+}
+
+/* ---- PRODUCT CARDS ---- */
+.product-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(230, 57, 70, 0.15);
+}
+
+.product-card .card-overlay {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-card:hover .card-overlay {
+  opacity: 1;
+}
+
+/* ---- SUBJECT CATEGORY CARDS ---- */
+.category-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.category-card:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+/* ---- BUTTONS ---- */
+.btn-rescue {
+  background: var(--rescue-red);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-rescue:hover {
+  background: var(--rescue-red-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(230, 57, 70, 0.35);
+}
+
+.btn-rescue-outline {
+  background: transparent;
+  color: var(--rescue-red);
+  border: 2px solid var(--rescue-red);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btn-rescue-outline:hover {
+  background: var(--rescue-red);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* ---- BADGE/TAG ---- */
+.subject-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* ---- SECTION DIVIDER ---- */
+.wave-divider {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+/* ---- TESTIMONIAL CARDS ---- */
+.testimonial-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid #f3f3f3;
+  transition: box-shadow 0.3s ease;
+}
+
+.testimonial-card:hover {
+  box-shadow: 0 10px 40px rgba(230,57,70,0.1);
+}
+
+/* ---- STARS ---- */
+.star-filled { color: #F59E0B; }
+.star-empty { color: #D1D5DB; }
+
+/* ---- PAGE HERO BANNERS ---- */
+.page-hero {
+  background: linear-gradient(135deg, var(--rescue-red) 0%, #c1121f 100%);
+  color: white;
+  padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+
+/* ---- FORM INPUTS ---- */
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  background: #fafafa;
+}
+
+.form-input:focus {
+  border-color: var(--rescue-red);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+}
+
+/* ---- ADMIN STYLES ---- */
+.admin-sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: var(--rescue-dark);
+}
+
+.admin-sidebar a:hover {
+  background: rgba(230, 57, 70, 0.15);
+  color: var(--rescue-red);
+}
+
+.admin-sidebar a.active {
+  background: var(--rescue-red);
+  color: white;
+}
+
+/* ---- LIFEBUOY ANIMATION ---- */
+.lifebuoy-spin {
+  animation: spin-slow 15s linear infinite;
+  transform-origin: center;
+}
+
+/* ---- PRICE BADGE ---- */
+.price-badge {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+}
+
+/* ---- GRADIENT CARDS ---- */
+.gradient-card-1 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+.gradient-card-2 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+.gradient-card-3 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
+.gradient-card-4 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: var(--rescue-red); border-radius: 3px; }
+
+/* ---- TOAST NOTIFICATIONS ---- */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toast {
+  background: white;
+  border-left: 4px solid var(--rescue-red);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 280px;
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ---- LOADING SPINNER ---- */
+.spinner {
+  border: 3px solid rgba(230, 57, 70, 0.2);
+  border-top-color: var(--rescue-red);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin-slow 0.8s linear infinite;
+}
+
+/* ---- DISCOUNT BADGE ---- */
+.discount-ribbon {
+  position: absolute;
+  top: 12px;
+  left: -8px;
+  background: var(--rescue-red);
+  color: white;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 0 4px 4px 0;
+  z-index: 10;
+}
+
+.discount-ribbon::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  border-width: 0 8px 8px 0;
+  border-style: solid;
+  border-color: transparent #a01015 transparent transparent;
+}
+
+/* ---- RESPONSIVE FIXES ---- */
+@media (max-width: 640px) {
+  .hero-gradient { padding: 2rem 0; }
+}
+
+/* ---- NEON GLOW EFFECT ---- */
+.neon-glow {
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.4), 0 0 40px rgba(230, 57, 70, 0.2);
+}
+
+/* ---- GLASSMORPHISM ---- */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}

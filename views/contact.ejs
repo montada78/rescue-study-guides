@@ -1,0 +1,106 @@
+<!-- CONTACT PAGE -->
+<div class="page-hero">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h1 class="font-display font-black text-5xl mb-3">Contact Us 📧</h1>
+    <p class="text-white/70 text-xl">We're here to help you rescue those grades!</p>
+  </div>
+</div>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="grid md:grid-cols-2 gap-10">
+    <!-- Contact Form -->
+    <div>
+      <h2 class="font-display font-bold text-2xl text-gray-800 mb-6">Send Us a Message</h2>
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-7">
+        <form class="space-y-4" onsubmit="submitContact(event)">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Your Name *</label>
+            <input type="text" required placeholder="Your full name" class="form-input">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email *</label>
+            <input type="email" required placeholder="your@email.com" class="form-input">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Subject</label>
+            <select class="form-input">
+              <option>General Question</option>
+              <option>Download Issue</option>
+              <option>Refund Request</option>
+              <option>Partnership / School</option>
+              <option>Report a Problem</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Message *</label>
+            <textarea required rows="5" placeholder="How can we help you?" class="form-input resize-none"></textarea>
+          </div>
+          <button type="submit" class="w-full bg-rescue-red text-white py-3.5 rounded-xl font-bold hover:bg-rescue-red-dark transition-all shadow-md">
+            <i class="fas fa-paper-plane mr-2"></i>Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div>
+      <h2 class="font-display font-bold text-2xl text-gray-800 mb-6">Get In Touch</h2>
+      <div class="space-y-5 mb-8">
+        <div class="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-rescue-red/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-envelope text-rescue-red"></i>
+          </div>
+          <div>
+            <p class="font-bold text-gray-800">Email</p>
+            <a href="mailto:hello@rescuestudyguides.com" class="text-rescue-red hover:underline text-sm">hello@rescuestudyguides.com</a>
+            <p class="text-gray-400 text-xs mt-0.5">We reply within 24 hours</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fab fa-instagram text-blue-500"></i>
+          </div>
+          <div>
+            <p class="font-bold text-gray-800">Social Media</p>
+            <p class="text-gray-500 text-sm">Follow us for study tips & guide updates</p>
+            <div class="flex gap-3 mt-2">
+              <a href="#" class="text-rescue-red text-sm font-semibold hover:underline">Instagram</a>
+              <a href="#" class="text-rescue-red text-sm font-semibold hover:underline">TikTok</a>
+              <a href="#" class="text-rescue-red text-sm font-semibold hover:underline">YouTube</a>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-clock text-green-600"></i>
+          </div>
+          <div>
+            <p class="font-bold text-gray-800">Support Hours</p>
+            <p class="text-gray-500 text-sm">Monday – Saturday</p>
+            <p class="text-gray-500 text-sm">9:00 AM – 6:00 PM (UAE Time)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-rescue-dark rounded-2xl p-6 text-white">
+        <h3 class="font-display font-bold text-base mb-3">⚡ Quick Download Help?</h3>
+        <p class="text-gray-400 text-sm mb-4">Having trouble with your download? Check your account first:</p>
+        <a href="/account/downloads" class="bg-rescue-red text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-rescue-red-dark transition-colors inline-flex items-center gap-2">
+          <i class="fas fa-download"></i>Go to My Downloads
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function submitContact(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.innerHTML = '<i class="fas fa-check mr-2"></i>Message Sent! We\'ll be in touch soon 🎉';
+  btn.classList.remove('bg-rescue-red');
+  btn.classList.add('bg-green-600');
+  btn.disabled = true;
+}
+</script>

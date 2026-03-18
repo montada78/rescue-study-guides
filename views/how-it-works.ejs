@@ -1,0 +1,98 @@
+<!-- HOW IT WORKS PAGE -->
+<div class="page-hero">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h1 class="font-display font-black text-5xl mb-3">How It Works</h1>
+    <p class="text-white/80 text-xl">Getting your rescue guide is ridiculously easy ⚡</p>
+  </div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <!-- Steps -->
+  <div class="space-y-8 mb-16">
+    <% [
+      { num: '01', icon: '🔍', title: 'Browse & Find Your Guide', color: 'from-red-400 to-red-600',
+        desc: 'Head to our Shop and filter by subject, curriculum (IGCSE, AP, SABIS, American), or level. Use the search bar to find exactly what you need. Not sure? Check our featured guides or grab a free one first!',
+        tip: 'Pro tip: Use the filter sidebar to narrow down by curriculum — perfect if you need something SABIS or IGCSE specific.' },
+      { num: '02', icon: '👤', title: 'Create Your Free Account', color: 'from-blue-400 to-blue-600',
+        desc: 'Sign up in under 60 seconds — just your name, email and password. No credit card required to join. Your account is your personal library where all your guides live forever.',
+        tip: 'Already have an account? Just log in and pick up where you left off.' },
+      { num: '03', icon: '💳', title: 'Checkout Securely', color: 'from-purple-400 to-purple-600',
+        desc: 'Add guides to your cart and checkout with our secure payment system. Your payment is encrypted with 256-bit SSL. We accept all major credit/debit cards. Free guides skip this step entirely!',
+        tip: 'Look out for bundle deals — you can save up to 40% buying multiple guides together.' },
+      { num: '04', icon: '⚡', title: 'Download Instantly', color: 'from-green-400 to-green-600',
+        desc: 'The second your order is confirmed, your guides appear in My Downloads. Click Download PDF and it\'s yours — no waiting, no shipping, no hassle. Works on laptop, tablet, or phone.',
+        tip: 'You can download each guide up to 5 times so you can have it on multiple devices.' },
+      { num: '05', icon: '🚀', title: 'Study & Ace Your Exam!', color: 'from-yellow-400 to-orange-500',
+        desc: 'Open your guide and get studying! Our color-coded layouts, worked examples, and exam tips are designed to help you retain information faster and score higher. You\'ve got this!',
+        tip: 'Print it out and annotate it, or study digitally — whatever works best for you.' },
+    ].forEach((step, i) => { %>
+    <div class="flex gap-6 items-start">
+      <div class="flex-shrink-0">
+        <div class="w-16 h-16 bg-gradient-to-br <%= step.color %> rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+          <%= step.icon %>
+        </div>
+      </div>
+      <div class="flex-1 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-xs font-black text-rescue-red bg-red-100 px-2.5 py-1 rounded-full">STEP <%= step.num %></span>
+          <h3 class="font-display font-black text-xl text-gray-800"><%= step.title %></h3>
+        </div>
+        <p class="text-gray-600 leading-relaxed mb-3"><%= step.desc %></p>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2.5 flex items-start gap-2">
+          <span class="text-yellow-500 flex-shrink-0">💡</span>
+          <p class="text-yellow-800 text-sm"><%= step.tip %></p>
+        </div>
+      </div>
+    </div>
+    <% if (i < 4) { %>
+    <div class="flex justify-start pl-7">
+      <div class="w-0.5 h-6 bg-gray-200 ml-[31px]"></div>
+    </div>
+    <% } %>
+    <% }) %>
+  </div>
+
+  <!-- FAQ -->
+  <div class="mb-12">
+    <h2 class="font-display font-black text-3xl text-gray-800 text-center mb-8">Frequently Asked Questions</h2>
+    <div class="space-y-3" id="faqAccordion">
+      <% [
+        { q: 'Are these guides printable?', a: 'Absolutely! All our guides are high-resolution PDFs designed to print beautifully in full color. They\'re made to be printed, annotated, and used however works best for you.' },
+        { q: 'How many times can I download a guide?', a: 'You get up to 5 downloads per guide, so you can have it on multiple devices (laptop, phone, tablet). Need more? Just contact our support team.' },
+        { q: 'Do the guides expire?', a: 'No! Once you purchase a guide, it\'s yours forever. Your downloads are stored in your account indefinitely.' },
+        { q: 'Which curriculums are covered?', a: 'We currently cover IGCSE Cambridge, AP College Board, SABIS, and American curriculum. We\'re constantly adding more guides!' },
+        { q: 'Can I get a refund?', a: 'Since our guides are digital downloads, we don\'t offer refunds after download. However, if there\'s a technical issue with the file, we\'ll replace it immediately. Contact us!' },
+        { q: 'Is there a free guide I can try first?', a: 'Yes! We have a free Chemistry Basics Starter Guide so you can see the quality before purchasing. Just create an account and grab it!' },
+      ].forEach((faq, idx) => { %>
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <button onclick="toggleFaq(<%= idx %>)" class="w-full text-left px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+          <span class="font-semibold text-gray-800"><%= faq.q %></span>
+          <i class="fas fa-chevron-down text-rescue-red transition-transform text-sm" id="faqArrow<%= idx %>"></i>
+        </button>
+        <div id="faqBody<%= idx %>" class="hidden px-6 pb-4">
+          <p class="text-gray-600 text-sm leading-relaxed"><%= faq.a %></p>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="bg-gradient-to-r from-rescue-red to-red-700 rounded-3xl p-8 text-white text-center">
+    <h2 class="font-display font-black text-3xl mb-3">Still Have Questions? 💬</h2>
+    <p class="text-white/80 mb-5">Our support team is happy to help with anything!</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="/contact" class="bg-white text-rescue-red px-6 py-3 rounded-xl font-bold hover:bg-yellow-50 transition-all">Contact Us</a>
+      <a href="/shop" class="border-2 border-white text-white px-6 py-3 rounded-xl font-bold hover:bg-white hover:text-rescue-red transition-all">Browse Guides</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleFaq(idx) {
+  const body = document.getElementById('faqBody' + idx);
+  const arrow = document.getElementById('faqArrow' + idx);
+  body.classList.toggle('hidden');
+  arrow.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+</script>

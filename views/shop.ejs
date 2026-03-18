@@ -1,0 +1,199 @@
+<!-- SHOP PAGE -->
+<!-- Page Hero -->
+<div class="page-hero">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between">
+      <div>
+        <h1 class="font-display font-black text-4xl mb-2">🛒 Shop All Guides</h1>
+        <p class="text-white/70">
+          <%= pagination.total %> guides available • 
+          IGCSE • AP • SABIS • American Curriculum
+        </p>
+      </div>
+      <div class="mt-4 md:mt-0">
+        <form action="/shop" method="GET" class="flex items-center gap-2">
+          <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-white/60 text-sm"></i>
+            <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search guides..."
+              class="bg-white/10 border border-white/30 text-white placeholder-white/50 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-white w-56">
+          </div>
+          <button type="submit" class="bg-white text-rescue-red px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-gray-100 transition-colors">Search</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+    
+    <!-- SIDEBAR FILTERS -->
+    <aside class="lg:w-64 flex-shrink-0">
+      <form action="/shop" method="GET" id="filterForm">
+        <input type="hidden" name="search" value="<%= searchQuery %>">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-6 sticky top-24">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display font-bold text-lg text-gray-800">Filters</h3>
+            <a href="/shop" class="text-xs text-rescue-red hover:underline font-medium">Clear All</a>
+          </div>
+
+          <!-- Subject/Category -->
+          <div>
+            <h4 class="font-semibold text-sm text-gray-700 mb-3">Subject</h4>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="category" value="all" <%= currentCategory === 'all' || !currentCategory ? 'checked' : '' %> class="accent-rescue-red" onchange="document.getElementById('filterForm').submit()">
+                <span class="text-sm text-gray-600 group-hover:text-rescue-red transition-colors">All Subjects</span>
+              </label>
+              <% categories.forEach(cat => { %>
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="category" value="<%= cat.slug %>" 
+                  <%= currentCategory === cat.slug ? 'checked' : '' %> class="accent-rescue-red" onchange="document.getElementById('filterForm').submit()">
+                <span class="text-sm text-gray-600 group-hover:text-rescue-red transition-colors"><%= cat.icon %> <%= cat.name %></span>
+              </label>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Level -->
+          <div>
+            <h4 class="font-semibold text-sm text-gray-700 mb-3">Level</h4>
+            <select name="level" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-rescue-red" onchange="this.form.submit()">
+              <option value="">All Levels</option>
+              <% levels.forEach(l => { %>
+              <option value="<%= l.level %>" <%= currentLevel === l.level ? 'selected' : '' %>><%= l.level %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- Curriculum -->
+          <div>
+            <h4 class="font-semibold text-sm text-gray-700 mb-3">Curriculum</h4>
+            <select name="curriculum" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-rescue-red" onchange="this.form.submit()">
+              <option value="">All Curriculums</option>
+              <% curriculums.forEach(c => { %>
+              <option value="<%= c.curriculum %>" <%= currentCurriculum === c.curriculum ? 'selected' : '' %>><%= c.curriculum %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- Sort -->
+          <div>
+            <h4 class="font-semibold text-sm text-gray-700 mb-3">Sort By</h4>
+            <select name="sort" class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-rescue-red" onchange="this.form.submit()">
+              <option value="" <%= !currentSort ? 'selected' : '' %>>Featured</option>
+              <option value="newest" <%= currentSort === 'newest' ? 'selected' : '' %>>Newest First</option>
+              <option value="price-low" <%= currentSort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+              <option value="price-high" <%= currentSort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+              <option value="popular" <%= currentSort === 'popular' ? 'selected' : '' %>>Most Popular</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </aside>
+
+    <!-- PRODUCTS GRID -->
+    <div class="flex-1">
+      <!-- Results header -->
+      <div class="flex items-center justify-between mb-6">
+        <p class="text-gray-600 text-sm">
+          Showing <strong><%= products.length %></strong> of <strong><%= pagination.total %></strong> guides
+          <% if (searchQuery) { %> for "<strong><%= searchQuery %></strong>"<% } %>
+        </p>
+      </div>
+
+      <% if (products.length === 0) { %>
+      <!-- Empty state -->
+      <div class="text-center py-20">
+        <div class="text-8xl mb-4">🔍</div>
+        <h3 class="font-display font-bold text-xl text-gray-800 mb-2">No guides found</h3>
+        <p class="text-gray-500 mb-6">Try adjusting your filters or search term</p>
+        <a href="/shop" class="btn-rescue">Clear Filters</a>
+      </div>
+      <% } else { %>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <% products.forEach(product => { %>
+        <div class="product-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-md">
+          <!-- Cover -->
+          <div class="relative h-44 overflow-hidden" style="background: linear-gradient(135deg, <%= product.category_color || '#E63946' %>22, <%= product.category_color || '#E63946' %>55);">
+            <% if (product.cover_image) { %>
+              <img src="<%= product.cover_image %>" alt="<%= product.title %>" class="w-full h-full object-cover">
+            <% } else { %>
+              <div class="w-full h-full flex flex-col items-center justify-center">
+                <div class="text-5xl mb-2">
+                  <%= product.subject === 'Mathematics' ? '🔢' : product.subject === 'Biology' ? '🧬' : product.subject === 'Chemistry' ? '⚗️' : product.subject === 'Physics' ? '⚡' : product.subject === 'English' ? '📖' : '📚' %>
+                </div>
+                <p class="font-bold text-xs" style="color: <%= product.category_color || '#E63946' %>"><%= product.subject %></p>
+              </div>
+            <% } %>
+            
+            <div class="absolute top-3 left-3 flex flex-col gap-1">
+              <% if (product.is_free || product.price === 0) { %>
+                <span class="bg-green-500 text-white text-xs font-black px-2.5 py-1 rounded-full">FREE</span>
+              <% } else if (product.original_price && product.original_price > product.price) { %>
+                <span class="bg-rescue-red text-white text-xs font-black px-2.5 py-1 rounded-full">SALE</span>
+              <% } %>
+            </div>
+            
+            <% if (isLoggedIn) { %>
+            <button data-wishlist="<%= product.id %>" class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:scale-110 transition-transform">
+              <i class="far fa-heart text-gray-400 text-sm"></i>
+            </button>
+            <% } %>
+          </div>
+          
+          <div class="p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background: <%= product.category_color || '#E63946' %>"><%= product.subject %></span>
+              <span class="text-xs text-gray-400"><%= product.curriculum %></span>
+            </div>
+            <a href="/product/<%= product.slug %>" class="block font-display font-bold text-gray-800 text-sm mb-1 hover:text-rescue-red transition-colors line-clamp-2 leading-tight">
+              <%= product.title %>
+            </a>
+            <div class="flex items-center gap-3 text-xs text-gray-400 mb-3">
+              <span><%= product.pages %> pages</span>
+              <span><%= product.downloads_count %> downloads</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <% if (product.is_free || product.price === 0) { %>
+                  <span class="font-black text-green-600 text-xl">FREE</span>
+                <% } else { %>
+                  <span class="font-black text-rescue-red text-xl">$<%= product.price.toFixed(2) %></span>
+                  <% if (product.original_price > product.price) { %>
+                    <span class="text-gray-300 text-sm line-through ml-1">$<%= product.original_price.toFixed(2) %></span>
+                  <% } %>
+                <% } %>
+              </div>
+              <% if (isLoggedIn) { %>
+              <button data-add-cart="<%= product.id %>" class="bg-rescue-red text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rescue-red-dark transition-all">
+                <i class="fas fa-<%= product.is_free ? 'download' : 'cart-plus' %> mr-1"></i>
+                <%= product.is_free || product.price === 0 ? 'Get Free' : 'Add' %>
+              </button>
+              <% } else { %>
+              <a href="/auth/login" class="bg-rescue-red text-white px-3 py-1.5 rounded-lg text-xs font-bold">Get Now</a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (pagination.pages > 1) { %>
+      <div class="flex justify-center mt-10 gap-2">
+        <% for (let i = 1; i <= pagination.pages; i++) { %>
+        <a href="/shop?page=<%= i %>&category=<%= currentCategory %>&search=<%= searchQuery %>&sort=<%= currentSort %>" 
+          class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold transition-all
+          <%= pagination.page === i ? 'bg-rescue-red text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:border-rescue-red hover:text-rescue-red' %>">
+          <%= i %>
+        </a>
+        <% } %>
+      </div>
+      <% } %>
+      <% } %>
+    </div>
+  </div>
+</div>

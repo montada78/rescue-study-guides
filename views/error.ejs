@@ -1,0 +1,17 @@
+<!-- ERROR PAGE -->
+<div class="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center px-4">
+  <div class="text-center max-w-lg">
+    <div class="text-8xl mb-6">⚠️</div>
+    <h1 class="font-display font-black text-4xl text-gray-800 mb-3">Oops! Something Went Wrong</h1>
+    <p class="text-gray-500 text-lg mb-3"><%= message || 'An unexpected error occurred.' %></p>
+    <p class="text-gray-400 text-sm mb-8">Don't worry — it's not your fault. Try again or contact support if this keeps happening.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="/" class="btn-rescue">
+        <i class="fas fa-home mr-2"></i>Go Home
+      </a>
+      <a href="/contact" class="btn-rescue-outline">
+        <i class="fas fa-headset mr-2"></i>Contact Support
+      </a>
+    </div>
+  </div>
+</div>

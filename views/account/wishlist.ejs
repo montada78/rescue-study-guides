@@ -1,0 +1,42 @@
+<!-- WISHLIST PAGE -->
+<div class="min-h-screen bg-gray-50">
+  <div class="page-hero">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="font-display font-black text-4xl mb-1">❤️ My Wishlist</h1>
+      <p class="text-white/70">Guides you're saving for later</p>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <% if (wishlist.length === 0) { %>
+    <div class="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
+      <div class="text-7xl mb-4">❤️</div>
+      <h3 class="font-display font-bold text-xl text-gray-700 mb-2">Your wishlist is empty</h3>
+      <p class="text-gray-500 mb-6">Browse guides and click the heart icon to save them here</p>
+      <a href="/shop" class="btn-rescue">Browse Guides</a>
+    </div>
+    <% } else { %>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <% wishlist.forEach(item => { %>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden product-card">
+        <div class="h-36 flex items-center justify-center text-5xl relative" style="background: linear-gradient(135deg, <%= item.category_color || '#E63946' %>22, <%= item.category_color || '#E63946' %>44);">
+          <%= item.subject === 'Mathematics' ? '🔢' : item.subject === 'Biology' ? '🧬' : item.subject === 'Chemistry' ? '⚗️' : item.subject === 'Physics' ? '⚡' : '📚' %>
+          <button data-wishlist="<%= item.id %>" class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:scale-110 transition-transform">
+            <i class="fas fa-heart text-rescue-red text-sm"></i>
+          </button>
+        </div>
+        <div class="p-4">
+          <a href="/product/<%= item.slug %>" class="font-display font-bold text-sm text-gray-800 hover:text-rescue-red transition-colors line-clamp-2 block mb-2"><%= item.title %></a>
+          <p class="text-xs text-gray-500 mb-3"><%= item.curriculum %> • <%= item.level %></p>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-rescue-red text-lg">$<%= item.price.toFixed(2) %></span>
+            <button data-add-cart="<%= item.id %>" class="bg-rescue-red text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rescue-red-dark transition-colors">
+              <i class="fas fa-cart-plus mr-1"></i>Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</div>

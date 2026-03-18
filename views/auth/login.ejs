@@ -1,0 +1,95 @@
+<!-- Login Page -->
+<div class="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center py-16 px-4">
+  <div class="w-full max-w-md">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex flex-col items-center">
+        <svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mb-3">
+          <circle cx="50" cy="50" r="48" fill="none" stroke="#E63946" stroke-width="4"/>
+          <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="#E63946"/>
+          <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="#E63946"/>
+          <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="#E63946"/>
+          <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="#E63946"/>
+          <circle cx="50" cy="50" r="18" fill="white"/>
+          <text x="50" y="56" text-anchor="middle" font-size="14" font-weight="bold" fill="#E63946" font-family="Poppins,sans-serif">RSG</text>
+        </svg>
+        <span class="font-display font-black text-2xl text-rescue-red">Rescue Study Guides</span>
+      </a>
+      <h1 class="font-display font-bold text-2xl text-gray-800 mt-4">Welcome back! 👋</h1>
+      <p class="text-gray-500 text-sm mt-1">Sign in to access your study guides</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+      <% if (error) { %>
+      <div class="bg-red-50 border-l-4 border-rescue-red rounded-xl p-4 mb-6 flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-rescue-red"></i>
+        <p class="text-red-700 text-sm font-medium"><%= error %></p>
+      </div>
+      <% } %>
+
+      <form action="/auth/login" method="POST" class="space-y-5">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+          <div class="relative">
+            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="email" name="email" required placeholder="your@email.com" 
+              class="form-input pl-11">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+          <div class="relative">
+            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="password" name="password" required placeholder="Enter your password" 
+              class="form-input pl-11" id="passwordInput">
+            <button type="button" onclick="togglePwd('passwordInput', 'pwdEye')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <i class="fas fa-eye text-sm" id="pwdEye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-300 text-rescue-red accent-rescue-red">
+            <span class="text-gray-600">Remember me</span>
+          </label>
+          <a href="/auth/forgot-password" class="text-rescue-red font-semibold hover:underline">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="w-full bg-rescue-red text-white py-3.5 rounded-xl font-bold text-base hover:bg-rescue-red-dark transition-all hover:scale-[1.02] shadow-md">
+          <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <p class="text-gray-500 text-sm">
+          Don't have an account? 
+          <a href="/auth/register" class="text-rescue-red font-bold hover:underline ml-1">Join Free 🚀</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Back to shop -->
+    <div class="text-center mt-6">
+      <a href="/shop" class="text-gray-500 text-sm hover:text-rescue-red transition-colors">
+        <i class="fas fa-arrow-left mr-1"></i>Browse guides without signing in
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd(inputId, eyeId) {
+  const input = document.getElementById(inputId);
+  const eye = document.getElementById(eyeId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    eye.className = 'fas fa-eye-slash text-sm';
+  } else {
+    input.type = 'password';
+    eye.className = 'fas fa-eye text-sm';
+  }
+}
+</script>

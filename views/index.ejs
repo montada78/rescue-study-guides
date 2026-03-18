@@ -1,0 +1,447 @@
+<!-- HERO SECTION -->
+<section class="hero-gradient min-h-screen flex items-center relative overflow-hidden pt-8 pb-16">
+  <!-- Background decorations -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 right-10 opacity-5 spin-slow">
+      <svg width="300" height="300" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#E63946" stroke-width="4"/>
+        <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="#E63946"/>
+        <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="#E63946"/>
+        <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="#E63946"/>
+        <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="#E63946"/>
+      </svg>
+    </div>
+    <div class="absolute bottom-20 left-10 opacity-5" style="animation: floatDelay 6s ease-in-out infinite;">
+      <svg width="150" height="150" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#E63946" stroke-width="4"/>
+        <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="#E63946"/>
+        <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="#E63946"/>
+        <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="#E63946"/>
+        <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="#E63946"/>
+      </svg>
+    </div>
+    <div class="absolute top-1/2 left-1/4 w-96 h-96 bg-red-100 rounded-full filter blur-3xl opacity-30 -translate-y-1/2"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Left Content -->
+      <div>
+        <div class="inline-flex items-center bg-red-50 border border-red-200 rounded-full px-4 py-2 text-sm font-semibold text-rescue-red mb-6">
+          <span class="w-2 h-2 bg-rescue-red rounded-full mr-2 animate-pulse"></span>
+          🚨 EXAM SEASON IS HERE — Are you ready?
+        </div>
+        
+        <h1 class="font-display font-black text-5xl lg:text-7xl text-rescue-dark leading-tight mb-4">
+          <span class="text-rescue-red">Rescue</span><br>
+          Your Exam<br>
+          <span class="relative inline-block">
+            Results
+            <svg class="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" preserveAspectRatio="none">
+              <path d="M0 6 Q50 0 100 5 Q150 10 200 4" stroke="#E63946" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          Today!
+        </h1>
+        
+        <p class="text-xl text-gray-600 mb-8 leading-relaxed max-w-lg">
+          Beautiful, colorful, high-end revision guides designed for <strong>Gen Z students</strong>. 
+          Stop stressing, start acing. IGCSE, AP, SABIS & more. 🎯
+        </p>
+
+        <div class="flex flex-wrap gap-4 mb-10">
+          <a href="/shop" class="btn-rescue text-base px-8 py-4 shadow-xl neon-glow">
+            <i class="fas fa-shopping-bag mr-2"></i>
+            Shop All Guides
+          </a>
+          <a href="/shop?free=1" class="btn-rescue-outline text-base px-8 py-4">
+            <i class="fas fa-gift mr-2"></i>
+            Get FREE Guide
+          </a>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="flex flex-wrap gap-6">
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-shield-alt text-green-600 text-xs"></i>
+            </div>
+            Secure Download
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-file-pdf text-blue-600 text-xs"></i>
+            </div>
+            Instant PDF Download
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-star text-yellow-500 text-xs"></i>
+            </div>
+            5-Star Rated
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Floating Guide Cards -->
+      <div class="relative h-[500px] hidden lg:block">
+        <!-- Main guide card -->
+        <div class="float-anim absolute top-0 right-8 w-72 bg-gradient-to-br from-rescue-red to-red-800 rounded-3xl p-6 text-white shadow-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">⚗️ CHEMISTRY</span>
+            <span class="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">IGCSE</span>
+          </div>
+          <h3 class="font-display font-black text-xl mb-2">Complete Chemistry Rescue Guide</h3>
+          <p class="text-white/70 text-sm mb-4">95 pages • Color-coded • Exam tips</p>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-2xl font-black">$14.99</span>
+              <span class="text-white/50 text-sm line-through ml-2">$22.99</span>
+            </div>
+            <div class="bg-white rounded-full w-10 h-10 flex items-center justify-center">
+              <i class="fas fa-download text-rescue-red"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Second card -->
+        <div class="float-anim-delay absolute bottom-20 left-0 w-64 bg-white rounded-3xl p-5 shadow-xl border border-gray-100">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center text-2xl">🧬</div>
+            <div>
+              <p class="font-bold text-sm text-gray-800">IGCSE Biology</p>
+              <p class="text-xs text-gray-500">Mega Rescue Pack</p>
+            </div>
+          </div>
+          <div class="flex text-yellow-400 text-xs mb-2">★★★★★</div>
+          <p class="text-rescue-red font-black text-lg">$11.99</p>
+        </div>
+
+        <!-- Third card - review -->
+        <div class="absolute bottom-0 right-0 w-64 bg-white rounded-3xl p-5 shadow-xl border border-gray-100" style="animation: float 5s ease-in-out infinite;">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-9 h-9 bg-purple-200 rounded-full flex items-center justify-center font-bold text-purple-700 text-sm">S</div>
+            <div>
+              <p class="font-semibold text-sm">Sarah K. 🇬🇧</p>
+              <div class="flex text-yellow-400 text-xs">★★★★★</div>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600 italic">"Got an A* in my IGCSE Chemistry thanks to these guides! GAME CHANGER! 🔥"</p>
+        </div>
+
+        <!-- Stats bubble -->
+        <div class="absolute top-40 right-0 bg-rescue-red rounded-2xl px-4 py-3 text-white shadow-lg">
+          <p class="text-2xl font-black">10k+</p>
+          <p class="text-xs text-white/80">Happy Students</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wave bottom -->
+  <div class="absolute bottom-0 left-0 right-0">
+    <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 60L60 50C120 40 240 20 360 15C480 10 600 20 720 25C840 30 960 30 1080 25C1200 20 1320 10 1380 5L1440 0V60H0Z" fill="white"/>
+    </svg>
+  </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="py-14 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="text-center p-6 rounded-2xl bg-red-50 border border-red-100">
+        <div class="font-display font-black text-4xl text-rescue-red mb-1" data-count="<%= stats.students + 500 %>">0</div>
+        <p class="text-gray-600 text-sm font-medium">Happy Students</p>
+      </div>
+      <div class="text-center p-6 rounded-2xl bg-blue-50 border border-blue-100">
+        <div class="font-display font-black text-4xl text-blue-600 mb-1" data-count="<%= stats.guides %>">0</div>
+        <p class="text-gray-600 text-sm font-medium">Study Guides</p>
+      </div>
+      <div class="text-center p-6 rounded-2xl bg-green-50 border border-green-100">
+        <div class="font-display font-black text-4xl text-green-600 mb-1" data-count="<%= stats.downloads + 1200 %>">0</div>
+        <p class="text-gray-600 text-sm font-medium">Total Downloads</p>
+      </div>
+      <div class="text-center p-6 rounded-2xl bg-yellow-50 border border-yellow-100">
+        <div class="font-display font-black text-4xl text-yellow-600 mb-1">4.9</div>
+        <p class="text-gray-600 text-sm font-medium">⭐ Avg Rating</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBJECTS / CATEGORIES -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <span class="inline-block bg-red-100 text-rescue-red text-sm font-bold px-4 py-1.5 rounded-full mb-4">📚 BROWSE BY SUBJECT</span>
+      <h2 class="font-display font-black text-4xl text-rescue-dark">Find Your Rescue Guide</h2>
+      <p class="text-gray-500 mt-2 text-lg">Pick your subject and start crushing your exams 💪</p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <% const subjectData = [
+        { icon: '🔢', name: 'Mathematics', slug: 'mathematics', bg: 'from-red-400 to-red-600' },
+        { icon: '🧬', name: 'Biology', slug: 'biology', bg: 'from-teal-400 to-teal-600' },
+        { icon: '⚗️', name: 'Chemistry', slug: 'chemistry', bg: 'from-orange-400 to-orange-600' },
+        { icon: '⚡', name: 'Physics', slug: 'physics', bg: 'from-blue-400 to-blue-600' },
+        { icon: '📖', name: 'English', slug: 'english', bg: 'from-purple-400 to-purple-600' },
+        { icon: '🏛️', name: 'History', slug: 'history', bg: 'from-amber-400 to-amber-600' },
+        { icon: '🌍', name: 'Geography', slug: 'geography', bg: 'from-green-400 to-green-600' },
+        { icon: '📊', name: 'Economics', slug: 'economics', bg: 'from-pink-400 to-pink-600' },
+        { icon: '💻', name: 'Computer Sci', slug: 'computer-science', bg: 'from-gray-600 to-gray-800' },
+        { icon: '🎓', name: 'Bundles', slug: 'all', bg: 'from-rescue-red to-red-700' },
+      ]; %>
+      
+      <% subjectData.forEach(subj => { %>
+      <a href="/shop?category=<%= subj.slug %>" class="category-card group">
+        <div class="bg-gradient-to-br <%= subj.bg %> rounded-2xl p-5 text-center text-white shadow-md hover:shadow-xl transition-all">
+          <div class="text-4xl mb-2 group-hover:scale-125 transition-transform inline-block"><%= subj.icon %></div>
+          <p class="font-display font-bold text-sm"><%= subj.name %></p>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <span class="inline-block bg-red-100 text-rescue-red text-sm font-bold px-4 py-1.5 rounded-full mb-3">🔥 HOT RIGHT NOW</span>
+        <h2 class="font-display font-black text-4xl text-rescue-dark">Featured Guides</h2>
+      </div>
+      <a href="/shop" class="btn-rescue-outline hidden sm:flex">View All <i class="fas fa-arrow-right ml-2"></i></a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% featuredProducts.forEach(product => { %>
+      <div class="product-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-md">
+        <!-- Cover Image / Placeholder -->
+        <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, <%= product.category_color || '#E63946' %>22, <%= product.category_color || '#E63946' %>44);">
+          <% if (product.cover_image) { %>
+            <img src="<%= product.cover_image %>" alt="<%= product.title %>" class="w-full h-full object-cover product-img" data-subject="<%= product.subject %>">
+          <% } else { %>
+            <div class="w-full h-full flex flex-col items-center justify-center">
+              <div class="text-6xl mb-2">
+                <%= product.subject === 'Mathematics' ? '🔢' :
+                    product.subject === 'Biology' ? '🧬' :
+                    product.subject === 'Chemistry' ? '⚗️' :
+                    product.subject === 'Physics' ? '⚡' :
+                    product.subject === 'English' ? '📖' :
+                    product.subject === 'History' ? '🏛️' : '📚' %>
+              </div>
+              <p class="font-display font-bold text-sm" style="color: <%= product.category_color || '#E63946' %>"><%= product.subject %></p>
+            </div>
+          <% } %>
+          
+          <!-- Badges -->
+          <div class="absolute top-3 left-3 flex flex-col gap-1.5">
+            <% if (product.is_featured) { %>
+              <span class="bg-yellow-400 text-yellow-900 text-xs font-black px-2.5 py-1 rounded-full">⭐ FEATURED</span>
+            <% } %>
+            <% if (product.is_free || product.price === 0) { %>
+              <span class="bg-green-500 text-white text-xs font-black px-2.5 py-1 rounded-full">🎁 FREE</span>
+            <% } else if (product.original_price && product.original_price > product.price) { %>
+              <span class="bg-rescue-red text-white text-xs font-black px-2.5 py-1 rounded-full">
+                <%= Math.round((1 - product.price/product.original_price) * 100) %>% OFF
+              </span>
+            <% } %>
+          </div>
+
+          <!-- Wishlist button -->
+          <% if (isLoggedIn) { %>
+          <button data-wishlist="<%= product.id %>" class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:scale-110 transition-transform">
+            <i class="far fa-heart text-gray-400 text-sm"></i>
+          </button>
+          <% } %>
+        </div>
+
+        <!-- Card Body -->
+        <div class="p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full text-white" style="background: <%= product.category_color || '#E63946' %>">
+              <%= product.category_name || product.subject %>
+            </span>
+            <span class="text-xs text-gray-500 font-medium"><%= product.curriculum %></span>
+          </div>
+
+          <h3 class="font-display font-bold text-gray-800 mb-1 line-clamp-2 leading-snug">
+            <a href="/product/<%= product.slug %>" class="hover:text-rescue-red transition-colors"><%= product.title %></a>
+          </h3>
+          
+          <p class="text-xs text-gray-500 mb-4 line-clamp-2"><%= product.short_description || product.description %></p>
+
+          <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+            <span><i class="fas fa-file-pdf mr-1 text-rescue-red"></i><%= product.pages %> pages</span>
+            <span><i class="fas fa-download mr-1 text-rescue-red"></i><%= product.downloads_count %> downloads</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <% if (product.is_free || product.price === 0) { %>
+                <span class="font-display font-black text-2xl text-green-600">FREE</span>
+              <% } else { %>
+                <span class="font-display font-black text-2xl text-rescue-red">$<%= product.price.toFixed(2) %></span>
+                <% if (product.original_price && product.original_price > product.price) { %>
+                  <span class="text-gray-400 text-sm line-through ml-1">$<%= product.original_price.toFixed(2) %></span>
+                <% } %>
+              <% } %>
+            </div>
+            
+            <% if (isLoggedIn) { %>
+              <button data-add-cart="<%= product.id %>" 
+                class="bg-rescue-red text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-rescue-red-dark transition-all hover:scale-105">
+                <i class="fas fa-<%= product.is_free || product.price === 0 ? 'download' : 'cart-plus' %> mr-1.5"></i>
+                <%= product.is_free || product.price === 0 ? 'Get Free' : 'Add to Cart' %>
+              </button>
+            <% } else { %>
+              <a href="/auth/login" class="bg-rescue-red text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-rescue-red-dark transition-all">
+                Get Now
+              </a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <div class="text-center mt-8">
+      <a href="/shop" class="btn-rescue text-base px-10 py-4">
+        <i class="fas fa-th-large mr-2"></i>Browse All <%= stats.guides %>+ Guides
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-16 bg-rescue-dark text-white overflow-hidden relative">
+  <div class="absolute inset-0 opacity-5">
+    <div class="absolute top-10 left-20 spin-slow">
+      <svg width="200" height="200" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="white" stroke-width="4"/>
+        <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="white"/>
+        <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="white"/>
+        <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="white"/>
+        <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="text-center mb-12">
+      <span class="inline-block bg-red-500/20 text-rescue-red-light text-sm font-bold px-4 py-1.5 rounded-full mb-4">⚡ SUPER SIMPLE</span>
+      <h2 class="font-display font-black text-4xl">How It Works</h2>
+      <p class="text-gray-400 mt-2 text-lg">From "I don't get it" to "I ace it" in 3 steps</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <% [
+        { num: '01', icon: '🔍', title: 'Find Your Guide', desc: 'Browse by subject, curriculum (IGCSE, AP, SABIS), or level. Search for exactly what you need.' },
+        { num: '02', icon: '💳', title: 'Instant Download', desc: 'Secure checkout in seconds. Your PDF guide is instantly available in your account dashboard.' },
+        { num: '03', icon: '🚀', title: 'Ace Your Exam', desc: 'Revise with our colorful, structured guides. Built specifically to help you retain more and score higher!' },
+      ].forEach(step => { %>
+      <div class="text-center group">
+        <div class="relative inline-block mb-5">
+          <div class="w-20 h-20 bg-red-500/10 border-2 border-red-500/30 rounded-3xl flex items-center justify-center text-4xl group-hover:bg-rescue-red group-hover:border-rescue-red transition-all mx-auto">
+            <%= step.icon %>
+          </div>
+          <div class="absolute -top-3 -right-3 bg-rescue-red text-white rounded-full w-8 h-8 flex items-center justify-center font-black text-xs">
+            <%= step.num %>
+          </div>
+        </div>
+        <h3 class="font-display font-bold text-xl mb-3"><%= step.title %></h3>
+        <p class="text-gray-400 text-sm leading-relaxed"><%= step.desc %></p>
+      </div>
+      <% }) %>
+    </div>
+
+    <div class="text-center mt-12">
+      <a href="/auth/register" class="bg-rescue-red text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-rescue-red-dark transition-all hover:scale-105 shadow-xl inline-flex items-center">
+        🚀 Start Rescuing Now — It's Free to Join!
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <span class="inline-block bg-yellow-100 text-yellow-700 text-sm font-bold px-4 py-1.5 rounded-full mb-4">💬 STUDENT REVIEWS</span>
+      <h2 class="font-display font-black text-4xl text-rescue-dark">What Students Say</h2>
+      <p class="text-gray-500 mt-2 text-lg">Real results from real students worldwide 🌍</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <% [
+        { name: 'Sarah K.', country: '🇬🇧', school: 'IGCSE Student, UK', rating: 5, text: 'Got an A* in my IGCSE Chemistry! These guides are literally a lifesaver. The color coding made everything click instantly. 10/10 recommend!', guide: 'AP Chemistry Guide' },
+        { name: 'Ahmed M.', country: '🇦🇪', school: 'SABIS Student, Dubai', rating: 5, text: 'As a SABIS student, it\'s hard to find resources that match our curriculum. These guides are PERFECT. Passed all my tests with flying colors!', guide: 'SABIS Maths Guide' },
+        { name: 'Jessica L.', country: '🇺🇸', school: 'AP Student, USA', rating: 5, text: 'The AP Chemistry rescue guide saved my grade. The way everything is organized and color-coded makes it SO much easier to study. Worth every penny!', guide: 'AP Chemistry Guide' },
+        { name: 'Omar H.', country: '🇸🇦', school: 'IGCSE Student, KSA', rating: 5, text: 'Downloaded the Biology guide night before my exam. ACTUALLY helped me understand things I had been confused about for months. LEGENDARY! 🔥', guide: 'IGCSE Biology Guide' },
+        { name: 'Emma T.', country: '🇦🇺', school: 'High School Student, AU', rating: 5, text: 'The study guides are beautifully designed - nothing like the boring textbooks. I actually ENJOY revising now. What is happening 😂', guide: 'IGCSE Maths Guide' },
+        { name: 'Fatima A.', country: '🇪🇬', school: 'University Prep, Cairo', rating: 5, text: 'The physics formula guide is incredible! All formulas organized, explained with examples. My score jumped from 60% to 88% after using it!', guide: 'Physics Formula Guide' },
+      ].forEach(review => { %>
+      <div class="testimonial-card">
+        <div class="flex text-yellow-400 text-sm mb-3">
+          <%= '★'.repeat(review.rating) %>
+        </div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-4 italic">"<%= review.text %>"</p>
+        <div class="flex items-center gap-3 pt-3 border-t border-gray-100">
+          <div class="w-10 h-10 bg-rescue-red/10 rounded-full flex items-center justify-center font-bold text-rescue-red text-sm flex-shrink-0">
+            <%= review.name.charAt(0) %>
+          </div>
+          <div>
+            <p class="font-semibold text-sm text-gray-800"><%= review.name %> <%= review.country %></p>
+            <p class="text-xs text-gray-500"><%= review.school %></p>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- FREE GUIDE CTA -->
+<% if (freeGuides.length > 0) { %>
+<section class="py-14 bg-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="bg-gradient-to-br from-rescue-red to-red-800 rounded-3xl p-10 text-white relative overflow-hidden">
+      <div class="absolute top-4 right-4 opacity-10 spin-slow">
+        <svg width="150" height="150" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="48" fill="none" stroke="white" stroke-width="4"/>
+          <path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="white"/>
+          <path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="white"/>
+          <path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="white"/>
+          <path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="text-5xl mb-4">🎁</div>
+      <h2 class="font-display font-black text-4xl mb-3">Try Before You Buy!</h2>
+      <p class="text-white/80 text-lg mb-6 max-w-xl mx-auto">
+        Get our <strong>FREE Chemistry Basics Starter Guide</strong> — absolutely zero cost. No credit card. Just sign up!
+      </p>
+      <a href="/auth/register" class="bg-white text-rescue-red px-8 py-4 rounded-xl font-black text-base hover:bg-yellow-50 transition-all hover:scale-105 inline-flex items-center shadow-xl">
+        <i class="fas fa-gift mr-2"></i>Grab Your Free Guide Now!
+      </a>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- CURRICULUMS BANNER -->
+<section class="py-10 bg-gray-50 border-y border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <p class="text-center text-gray-500 text-sm font-medium mb-6 uppercase tracking-wider">Trusted Guides for All Curriculums</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <% ['IGCSE Cambridge', 'AP College Board', 'SABIS', 'American Curriculum', 'IB', 'Edexcel'].forEach(curr => { %>
+      <a href="/shop?curriculum=<%= curr.replace(' ', '+') %>" 
+        class="bg-white border-2 border-gray-200 rounded-xl px-5 py-2.5 font-display font-bold text-sm text-gray-700 hover:border-rescue-red hover:text-rescue-red transition-all">
+        <%= curr %>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
