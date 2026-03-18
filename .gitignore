@@ -1,14 +1,35 @@
+# Dependencies
 node_modules/
+
+# Environment
 .env
+.env.local
+.env.production
+
+# Database (don't commit the actual DB, only db.js)
 database/*.db
 database/*.db-shm
 database/*.db-wal
-public/uploads/guides/
+database/sessions.db
+
+# Uploads (user files)
+public/uploads/guides/*
+public/uploads/images/*
+
+# Logs
 logs/
 *.log
+
+# PM2
 .pm2/
-npm-debug.log*
+
+# OS files
 .DS_Store
 Thumbs.db
-*.zip
-*.tar.gz
+
+# Editor
+.vscode/
+.idea/
+
+# Build
+dist/
