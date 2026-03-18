@@ -26,7 +26,7 @@
     </div>
 
     <div class="p-8">
-      <form action="/admin/products/<%= product ? 'edit/' + product.id : 'new' %>" method="POST" enctype="multipart/form-data">
+      <form id="productForm" action="/admin/products/<%= product ? 'edit/' + product.id : 'new' %>" method="POST" enctype="multipart/form-data">
         <div class="grid lg:grid-cols-3 gap-6">
           
           <!-- Main Fields -->
@@ -109,13 +109,23 @@
                     PDF Study Guide File
                     <% if (product?.file_name) { %><span class="text-green-600 font-normal ml-2">✅ Current: <%= product.file_name %></span><% } %>
                   </label>
-                  <label for="pdf_file" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-rescue-red transition-colors cursor-pointer block">
+                  <label for="pdf_file" id="pdfLabel" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-rescue-red transition-colors cursor-pointer block">
                     <i class="fas fa-file-pdf text-3xl text-red-400 mb-2"></i>
-                    <p class="text-sm text-gray-600 font-medium">Click to upload PDF (Max 200MB)</p>
+                    <p id="pdfLabelText" class="text-sm text-gray-600 font-medium">Click to upload PDF (Max 200MB)</p>
                     <p class="text-xs text-gray-400 mt-1">Accepted: .pdf only</p>
                   </label>
                   <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" class="hidden">
-                  <p id="pdfName" class="text-sm text-green-600 mt-1 hidden"></p>
+                  <!-- Upload Progress Bar -->
+                  <div id="uploadProgressWrap" class="hidden mt-3">
+                    <div class="flex justify-between text-xs text-gray-500 mb-1">
+                      <span id="uploadFileName" class="truncate max-w-xs"></span>
+                      <span id="uploadPercent" class="font-bold text-rescue-red">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                      <div id="uploadBar" class="bg-rescue-red h-3 rounded-full transition-all duration-200" style="width:0%"></div>
+                    </div>
+                    <p id="uploadStatus" class="text-xs text-gray-400 mt-1">Preparing...</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -171,9 +181,15 @@
             </div>
 
             <!-- Submit -->
-            <button type="submit" class="w-full bg-rescue-red text-white py-3.5 rounded-xl font-bold hover:bg-rescue-red-dark transition-all shadow-md hover:scale-[1.02]">
-              <i class="fas fa-<%= product ? 'save' : 'plus' %> mr-2"></i>
-              <%= product ? 'Update Guide' : 'Publish Guide' %>
+            <button type="button" id="submitBtn" onclick="handleSubmit()" class="w-full bg-rescue-red text-white py-3.5 rounded-xl font-bold hover:bg-rescue-red-dark transition-all shadow-md hover:scale-[1.02]">
+              <i class="fas fa-<%= product ? 'save' : 'plus' %> mr-2" id="submitIcon"></i>
+              <span id="submitText"><%= product ? 'Update Guide' : 'Publish Guide' %></span>
+            </button>
+            <!-- Save Upload button - only active after 100% upload -->
+            <button type="button" id="saveUploadBtn" disabled
+              class="w-full bg-gray-300 text-gray-500 py-3.5 rounded-xl font-bold transition-all cursor-not-allowed hidden"
+              onclick="finalSave()">
+              <i class="fas fa-cloud-upload-alt mr-2"></i> Save Upload
             </button>
             
             <% if (product) { %>
@@ -189,3 +205,151 @@
     </div>
   </main>
 </div>
+<script>
+var uploadDone = false;
+var formAction = document.getElementById('productForm').action;
+
+// ── PDF file selected ──────────────────────────────────────────────────────
+document.getElementById('pdf_file').addEventListener('change', function() {
+  if (!this.files || !this.files[0]) return;
+  var f = this.files[0];
+  var size = (f.size / 1024 / 1024).toFixed(1);
+
+  // Update label appearance
+  document.getElementById('pdfLabelText').innerHTML =
+    '<i class="fas fa-file-pdf text-red-500 mr-1"></i>' + f.name + ' (' + size + ' MB) — ready to upload';
+  document.getElementById('pdfLabel').style.borderColor = '#e63946';
+  document.getElementById('pdfLabel').style.background  = '#fff5f5';
+
+  // Show progress area
+  document.getElementById('uploadFileName').textContent = f.name;
+  document.getElementById('uploadProgressWrap').classList.remove('hidden');
+  document.getElementById('uploadPercent').textContent  = '0%';
+  document.getElementById('uploadBar').style.width      = '0%';
+  document.getElementById('uploadBar').className        = 'bg-rescue-red h-3 rounded-full transition-all duration-200';
+  document.getElementById('uploadStatus').textContent   = 'Ready — click the button below to start uploading';
+
+  // Show Save Upload button (disabled until 100 %)
+  document.getElementById('saveUploadBtn').classList.remove('hidden');
+  document.getElementById('saveUploadBtn').disabled  = true;
+  document.getElementById('saveUploadBtn').className =
+    'w-full bg-gray-300 text-gray-500 py-3.5 rounded-xl font-bold cursor-not-allowed transition-all';
+
+  uploadDone = false;
+});
+
+// ── Publish / Update button ────────────────────────────────────────────────
+function handleSubmit() {
+  var form      = document.getElementById('productForm');
+  var pdfFile   = document.getElementById('pdf_file').files[0];
+  var submitBtn = document.getElementById('submitBtn');
+  var saveBtn   = document.getElementById('saveUploadBtn');
+
+  // No PDF → plain form submit
+  if (!pdfFile) {
+    form.submit();
+    return;
+  }
+
+  // ── XHR with progress ──
+  var formData = new FormData(form);
+  var xhr = new XMLHttpRequest();
+
+  // Lock publish button
+  submitBtn.disabled  = true;
+  submitBtn.className = 'w-full bg-gray-400 text-white py-3.5 rounded-xl font-bold cursor-not-allowed';
+  document.getElementById('submitText').textContent = 'Uploading…';
+  document.getElementById('uploadProgressWrap').classList.remove('hidden');
+  document.getElementById('uploadStatus').textContent = 'Starting upload…';
+
+  // ── Upload progress ──
+  xhr.upload.addEventListener('progress', function(e) {
+    if (!e.lengthComputable) return;
+    var pct = Math.round((e.loaded / e.total) * 100);
+
+    document.getElementById('uploadBar').style.width     = pct + '%';
+    document.getElementById('uploadPercent').textContent = pct + '%';
+
+    if (pct < 100) {
+      var loaded = (e.loaded / 1024 / 1024).toFixed(1);
+      var total  = (e.total  / 1024 / 1024).toFixed(1);
+      document.getElementById('uploadStatus').textContent =
+        'Uploading… ' + pct + '%  (' + loaded + ' MB / ' + total + ' MB)';
+    } else {
+      document.getElementById('uploadStatus').textContent = '⏳ Processing on server…';
+    }
+  });
+
+  // ── Upload complete ──
+  xhr.addEventListener('load', function() {
+    // Parse JSON response from server
+    var resp = null;
+    try { resp = JSON.parse(xhr.responseText); } catch(e) {}
+
+    if (xhr.status >= 200 && xhr.status < 400 && resp && resp.success) {
+      // ✅ Success
+      document.getElementById('uploadBar').style.width     = '100%';
+      document.getElementById('uploadPercent').textContent = '100%';
+      document.getElementById('uploadBar').className       =
+        'bg-green-500 h-3 rounded-full transition-all duration-200';
+      document.getElementById('uploadStatus').textContent  = '✅ Upload complete! Click "Save Upload" to go to products.';
+
+      uploadDone = true;
+
+      // Activate Save Upload button
+      saveBtn.disabled  = false;
+      saveBtn.className =
+        'w-full bg-green-600 text-white py-3.5 rounded-xl font-bold hover:bg-green-700 transition-all shadow-md cursor-pointer animate-pulse';
+
+      // Grey out publish button
+      submitBtn.className = 'w-full bg-gray-300 text-gray-500 py-3.5 rounded-xl font-bold cursor-not-allowed';
+
+      // Auto-redirect after 2 s
+      setTimeout(function() {
+        window.location.href = resp.redirect || '/admin/products';
+      }, 2000);
+
+    } else {
+      // ❌ Server error
+      var msg = (resp && resp.message) ? resp.message : 'Server error (status ' + xhr.status + ')';
+      document.getElementById('uploadStatus').textContent = '❌ ' + msg;
+      document.getElementById('uploadBar').className      = 'bg-red-500 h-3 rounded-full';
+      _resetSubmitBtn();
+    }
+  });
+
+  // ── Network error ──
+  xhr.addEventListener('error', function() {
+    document.getElementById('uploadStatus').textContent = '❌ Network error — check your connection and retry.';
+    document.getElementById('uploadBar').className      = 'bg-red-500 h-3 rounded-full';
+    _resetSubmitBtn();
+  });
+
+  // ── Timeout ──
+  xhr.addEventListener('timeout', function() {
+    document.getElementById('uploadStatus').textContent = '❌ Upload timed out — file may be too large for this connection.';
+    document.getElementById('uploadBar').className      = 'bg-red-500 h-3 rounded-full';
+    _resetSubmitBtn();
+  });
+
+  // Tell server this is an XHR request (so it returns JSON instead of redirect)
+  xhr.open('POST', formAction);
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+  xhr.timeout = 300000; // 5 min timeout
+  xhr.send(formData);
+}
+
+function _resetSubmitBtn() {
+  var submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled  = false;
+  submitBtn.className = 'w-full bg-rescue-red text-white py-3.5 rounded-xl font-bold hover:bg-rescue-red-dark transition-all shadow-md hover:scale-[1.02]';
+  document.getElementById('submitText').textContent = 'Retry Upload';
+}
+
+// ── Save Upload button (active only after 100 %) ───────────────────────────
+function finalSave() {
+  if (uploadDone) {
+    window.location.href = '/admin/products';
+  }
+}
+</script>

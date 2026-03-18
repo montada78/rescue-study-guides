@@ -79,6 +79,9 @@ router.post('/products/new', requireAdmin, (req, res, next) => {
     { name: 'pdf_file', maxCount: 1 }
   ])(req, res, (err) => {
     if (err) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
+      }
       req.session.error = 'Upload error: ' + err.message;
       return res.redirect('/admin/products/new');
     }
@@ -109,6 +112,10 @@ router.post('/products/new', requireAdmin, (req, res, next) => {
   `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, previewImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags);
 
   req.session.success = 'Product added successfully!';
+  // Return JSON for XHR/fetch requests, redirect for normal form submits
+  if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    return res.json({ success: true, redirect: '/admin/products', message: 'Product saved successfully!' });
+  }
   res.redirect('/admin/products');
 });
 
@@ -128,6 +135,9 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
     { name: 'pdf_file', maxCount: 1 }
   ])(req, res, (err) => {
     if (err) {
+      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
+      }
       req.session.error = 'Upload error: ' + err.message;
       return res.redirect('/admin/products/edit/' + req.params.id);
     }
@@ -165,6 +175,9 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   `).run(title, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, previewImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags, product.id);
 
   req.session.success = 'Product updated successfully!';
+  if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    return res.json({ success: true, redirect: '/admin/products', message: 'Product updated successfully!' });
+  }
   res.redirect('/admin/products');
 });
 
