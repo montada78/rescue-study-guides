@@ -120,22 +120,22 @@
 
                   <!-- Upload Now button — appears after file chosen -->
                   <button type="button" id="uploadNowBtn"
-                    class="hidden w-full mt-3 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md"
-                    onclick="startUpload()">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i>
+                    style="display:none;width:100%;margin-top:0.75rem;background:#2563eb;color:#fff;padding:0.75rem;border-radius:0.75rem;font-weight:700;border:none;cursor:pointer;font-size:0.95rem;"
+                    >
+                    <i class="fas fa-cloud-upload-alt" style="margin-right:0.5rem"></i>
                     <span id="uploadNowText">Upload PDF Now</span>
                   </button>
 
                   <!-- Progress Bar -->
-                  <div id="uploadProgressWrap" class="hidden mt-3">
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
-                      <span id="uploadFileName" class="truncate max-w-xs font-medium"></span>
-                      <span id="uploadPercent" class="font-bold text-blue-600">0%</span>
+                  <div id="uploadProgressWrap" style="display:none;margin-top:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#6b7280;margin-bottom:4px;">
+                      <span id="uploadFileName" style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;"></span>
+                      <span id="uploadPercent" style="font-weight:700;color:#2563eb;">0%</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                      <div id="uploadBar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width:0%"></div>
+                    <div style="width:100%;background:#e5e7eb;border-radius:9999px;height:16px;overflow:hidden;">
+                      <div id="uploadBar" style="width:0%;background:#2563eb;height:16px;border-radius:9999px;transition:width 0.3s;"></div>
                     </div>
-                    <p id="uploadStatus" class="text-xs text-gray-500 mt-1.5">Waiting…</p>
+                    <p id="uploadStatus" style="font-size:0.75rem;color:#6b7280;margin-top:4px;">Waiting…</p>
                   </div>
                 </div>
               </div>
