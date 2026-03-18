@@ -108,6 +108,7 @@ const cartRoutes = require('./routes/cart');
 const downloadRoutes = require('./routes/downloads');
 const accountRoutes = require('./routes/account');
 const adminRoutes = require('./routes/admin');
+const paymentRoutes = require('./routes/payment');
 
 app.use('/', storeRoutes);
 app.use('/auth', authRoutes);
@@ -115,6 +116,7 @@ app.use('/cart', cartRoutes);
 app.use('/downloads', downloadRoutes);
 app.use('/account', accountRoutes);
 app.use('/admin', adminRoutes);
+app.use('/payment', paymentRoutes);
 
 // 404 handler
 app.use((req, res) => {

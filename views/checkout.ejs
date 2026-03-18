@@ -1,55 +1,114 @@
 <!-- CHECKOUT PAGE -->
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <h1 class="font-display font-black text-3xl text-gray-800 mb-8">🔒 Secure Checkout</h1>
+
   <div class="grid lg:grid-cols-2 gap-8">
-    <!-- Payment Form -->
-    <div>
-      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-5">
-        <h3 class="font-display font-bold text-lg mb-4">Payment Details</h3>
-        <form action="/cart/checkout/process" method="POST" class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Name on Card</label>
-            <input type="text" name="card_name" placeholder="John Smith" class="form-input" required>
+    <!-- Payment Methods -->
+    <div class="space-y-4">
+
+      <!-- Payment Tab Selector -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-1.5 flex gap-1">
+        <button onclick="showTab('stripe')" id="tab-stripe"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-rescue-red text-white">
+          💳 Credit Card
+        </button>
+        <button onclick="showTab('paypal')" id="tab-paypal"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-500 hover:bg-gray-50">
+          <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" class="inline h-4 mr-1" onerror="this.style.display='none'">PayPal
+        </button>
+        <button onclick="showTab('demo')" id="tab-demo"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-500 hover:bg-gray-50">
+          🧪 Test/Demo
+        </button>
+      </div>
+
+      <!-- STRIPE CARD FORM -->
+      <div id="panel-stripe" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-credit-card text-rescue-red"></i>
+          <h3 class="font-display font-bold text-base">Pay with Credit / Debit Card</h3>
+          <div class="ml-auto flex gap-1.5">
+            <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" class="h-6" alt="Visa">
+            <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" class="h-6" alt="MC">
+            <img src="https://js.stripe.com/v3/fingerprinted/img/amex-a49b82f46c5cd6a96a6e418a6ca1717c.svg" class="h-6" alt="Amex">
           </div>
+        </div>
+
+        <div id="stripe-error" class="hidden bg-red-50 border-l-4 border-rescue-red text-red-700 text-sm p-3 rounded-xl mb-4"></div>
+
+        <div class="space-y-3">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Card Number</label>
-            <div class="relative">
-              <i class="fas fa-credit-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              <input type="text" placeholder="4242 4242 4242 4242" class="form-input pl-11" maxlength="19" oninput="formatCard(this)">
-            </div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Card Number</label>
+            <div id="stripe-card-number" class="form-input py-3 bg-white"></div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Expiry</label>
-              <input type="text" placeholder="MM/YY" class="form-input" maxlength="5">
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Expiry</label>
+              <div id="stripe-card-expiry" class="form-input py-3 bg-white"></div>
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">CVV</label>
-              <input type="text" placeholder="123" class="form-input" maxlength="4">
+              <label class="block text-xs font-semibold text-gray-600 mb-1.5">CVC</label>
+              <div id="stripe-card-cvc" class="form-input py-3 bg-white"></div>
             </div>
           </div>
-          <input type="hidden" name="payment_method" value="card">
-          <button type="submit" class="w-full bg-rescue-red text-white py-4 rounded-xl font-black text-lg hover:bg-rescue-red-dark transition-all shadow-xl hover:scale-[1.02]">
-            <i class="fas fa-lock mr-2"></i>Pay $<%= total.toFixed(2) %> — Get Instant Access!
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Name on Card</label>
+            <input type="text" id="stripe-name" placeholder="John Smith" class="form-input">
+          </div>
+        </div>
+
+        <button onclick="payWithStripe()" id="stripe-btn"
+          class="mt-5 w-full bg-rescue-red text-white py-4 rounded-xl font-black text-base hover:bg-rescue-red-dark transition-all shadow-md hover:scale-[1.02] flex items-center justify-center gap-2">
+          <i class="fas fa-lock"></i>
+          Pay $<%= total.toFixed(2) %> — Get Instant Access!
+        </button>
+        <p class="text-center text-xs text-gray-400 mt-2">
+          <i class="fas fa-shield-alt text-green-500 mr-1"></i>256-bit SSL • Powered by Stripe
+        </p>
+      </div>
+
+      <!-- PAYPAL FORM -->
+      <div id="panel-paypal" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="font-display font-bold text-base">Pay with PayPal</h3>
+        </div>
+        <p class="text-sm text-gray-500 mb-5">Click the button below to pay securely via PayPal. You can use your PayPal balance or any card linked to your account.</p>
+        <div id="paypal-button-container"></div>
+        <div id="paypal-error" class="hidden bg-red-50 border-l-4 border-rescue-red text-red-700 text-sm p-3 rounded-xl mt-3"></div>
+        <p class="text-center text-xs text-gray-400 mt-3">
+          <i class="fas fa-shield-alt text-green-500 mr-1"></i>Buyer Protection • Powered by PayPal
+        </p>
+      </div>
+
+      <!-- DEMO FORM -->
+      <div id="panel-demo" class="hidden bg-white rounded-2xl shadow-sm border border-yellow-200 p-6">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4">
+          <p class="text-yellow-800 text-sm font-semibold">🧪 Test / Demo Mode</p>
+          <p class="text-yellow-700 text-xs mt-1">No real payment is taken. Use this to test the full checkout flow.</p>
+        </div>
+        <form action="/payment/demo/process" method="POST">
+          <button type="submit"
+            class="w-full bg-gray-800 text-white py-4 rounded-xl font-black text-base hover:bg-gray-700 transition-all shadow-md">
+            ✅ Complete Demo Order — $<%= total.toFixed(2) %>
           </button>
-          <p class="text-center text-xs text-gray-400 mt-2"><i class="fas fa-shield-alt text-green-500 mr-1"></i>256-bit SSL encrypted • Secure payment</p>
         </form>
       </div>
+
     </div>
 
     <!-- Order Summary -->
     <div>
-      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
         <h3 class="font-display font-bold text-lg mb-4">Your Order</h3>
         <div class="space-y-3 mb-5">
           <% cartItems.forEach(item => { %>
           <div class="flex items-center gap-3 py-2 border-b border-gray-50">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-gray-50">
-              <%= item.subject === 'Chemistry' ? '⚗️' : item.subject === 'Biology' ? '🧬' : item.subject === 'Mathematics' ? '🔢' : '📚' %>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-gray-50 flex-shrink-0">
+              <%= item.subject === 'Chemistry' ? '⚗️' : item.subject === 'Biology' ? '🧬' : item.subject === 'Mathematics' ? '🔢' : item.subject === 'Physics' ? '⚡' : '📚' %>
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-semibold text-gray-800 truncate"><%= item.title %></p>
-              <p class="text-xs text-gray-500"><%= item.level %></p>
+              <p class="text-xs text-gray-500"><%= item.level %> • <%= item.curriculum %></p>
             </div>
             <p class="font-bold text-rescue-red flex-shrink-0">$<%= item.price.toFixed(2) %></p>
           </div>
@@ -62,15 +121,128 @@
         <div class="bg-green-50 rounded-xl p-4 space-y-2 text-sm text-green-700">
           <div class="flex items-center gap-2"><i class="fas fa-bolt text-yellow-500"></i>Guides available instantly after payment</div>
           <div class="flex items-center gap-2"><i class="fas fa-download text-green-600"></i>Download up to 5 times per guide</div>
-          <div class="flex items-center gap-2"><i class="fas fa-headset text-blue-500"></i>24/7 support at hello@rescuestudyguides.com</div>
+          <div class="flex items-center gap-2"><i class="fas fa-headset text-blue-500"></i>Support: hello@rescuestudyguides.com</div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Stripe JS -->
+<% if (process.env.STRIPE_PUBLISHABLE_KEY && !process.env.STRIPE_PUBLISHABLE_KEY.includes('YOUR_')) { %>
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-function formatCard(input) {
-  let v = input.value.replace(/\D/g,'').substring(0,16);
-  input.value = v.replace(/(.{4})/g,'$1 ').trim();
+const stripe = Stripe('<%= process.env.STRIPE_PUBLISHABLE_KEY %>');
+const elements = stripe.elements();
+const cardNumber = elements.create('cardNumber', { style: { base: { fontSize: '15px', color: '#1a1a2e' } } });
+const cardExpiry = elements.create('cardExpiry', { style: { base: { fontSize: '15px', color: '#1a1a2e' } } });
+const cardCvc = elements.create('cardCvc', { style: { base: { fontSize: '15px', color: '#1a1a2e' } } });
+cardNumber.mount('#stripe-card-number');
+cardExpiry.mount('#stripe-card-expiry');
+cardCvc.mount('#stripe-card-cvc');
+
+async function payWithStripe() {
+  const btn = document.getElementById('stripe-btn');
+  const errEl = document.getElementById('stripe-error');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner inline-block mr-2"></span>Processing...';
+  errEl.classList.add('hidden');
+
+  try {
+    const intentRes = await fetch('/payment/stripe/create-intent', { method: 'POST' });
+    const intentData = await intentRes.json();
+    if (intentData.error) { showStripeError(intentData.error); return; }
+
+    const result = await stripe.confirmCardPayment(intentData.clientSecret, {
+      payment_method: {
+        card: cardNumber,
+        billing_details: { name: document.getElementById('stripe-name').value }
+      }
+    });
+
+    if (result.error) {
+      showStripeError(result.error.message);
+    } else if (result.paymentIntent.status === 'succeeded') {
+      btn.innerHTML = '✅ Payment Successful! Redirecting...';
+      const form = document.createElement('form');
+      form.method = 'POST'; form.action = '/payment/stripe/confirm';
+      const input = document.createElement('input');
+      input.type = 'hidden'; input.name = 'payment_intent_id'; input.value = result.paymentIntent.id;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    }
+  } catch(e) {
+    showStripeError('Network error. Please try again.');
+  }
+}
+
+function showStripeError(msg) {
+  const errEl = document.getElementById('stripe-error');
+  const btn = document.getElementById('stripe-btn');
+  errEl.textContent = msg;
+  errEl.classList.remove('hidden');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-lock mr-2"></i>Pay $<%= total.toFixed(2) %> — Try Again';
+}
+</script>
+<% } else { %>
+<script>
+async function payWithStripe() {
+  alert('Stripe not configured yet. Add STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY to your .env file.\n\nGet keys at: https://dashboard.stripe.com/apikeys');
+}
+</script>
+<% } %>
+
+<!-- PayPal JS -->
+<% if (process.env.PAYPAL_CLIENT_ID && !process.env.PAYPAL_CLIENT_ID.includes('YOUR_')) { %>
+<script src="https://www.paypal.com/sdk/js?client-id=<%= process.env.PAYPAL_CLIENT_ID %>&currency=USD"></script>
+<script>
+paypal.Buttons({
+  createOrder: async () => {
+    const res = await fetch('/payment/paypal/create-order', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) { document.getElementById('paypal-error').textContent = data.error; document.getElementById('paypal-error').classList.remove('hidden'); return; }
+    return data.orderID;
+  },
+  onApprove: async (data) => {
+    const res = await fetch('/payment/paypal/capture-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderID: data.orderID })
+    });
+    const result = await res.json();
+    if (result.success) { window.location.href = result.redirect; }
+    else { document.getElementById('paypal-error').textContent = result.error || 'Payment failed'; document.getElementById('paypal-error').classList.remove('hidden'); }
+  },
+  onError: (err) => {
+    document.getElementById('paypal-error').textContent = 'PayPal error. Please try another payment method.';
+    document.getElementById('paypal-error').classList.remove('hidden');
+  }
+}).render('#paypal-button-container');
+</script>
+<% } else { %>
+<script>
+document.getElementById('paypal-button-container').innerHTML = `
+  <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center text-sm text-yellow-800">
+    <p class="font-bold mb-1">PayPal not configured yet</p>
+    <p>Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET to your .env file.</p>
+    <a href="https://developer.paypal.com/dashboard" target="_blank" class="text-blue-600 underline mt-1 inline-block">Get PayPal credentials →</a>
+  </div>`;
+</script>
+<% } %>
+
+<script>
+function showTab(tab) {
+  ['stripe','paypal','demo'].forEach(t => {
+    document.getElementById('panel-' + t).classList.add('hidden');
+    const btn = document.getElementById('tab-' + t);
+    btn.classList.remove('bg-rescue-red','text-white');
+    btn.classList.add('text-gray-500');
+  });
+  document.getElementById('panel-' + tab).classList.remove('hidden');
+  const active = document.getElementById('tab-' + tab);
+  active.classList.add('bg-rescue-red','text-white');
+  active.classList.remove('text-gray-500');
 }
 </script>

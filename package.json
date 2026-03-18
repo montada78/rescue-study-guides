@@ -24,6 +24,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.8.0",
     "compression": "^1.8.1",
@@ -38,6 +39,7 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "sqlite3": "^6.0.1",
+    "stripe": "^20.4.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
