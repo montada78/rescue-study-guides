@@ -1,130 +1,162 @@
-# 🚀 Rescue Study Guides — Hostinger Deployment Guide
+# 🚀 Hostinger Deployment Guide — Rescue Study Guides
 
-## 📁 What's Included
-- Full Node.js Express web application
-- SQLite database (auto-created on first run)
-- User authentication (login/register)
-- Online store with product management
-- Downloadable PDF system
-- Admin panel at `/admin`
-- Beautiful Gen Z-styled frontend
+## ✅ COMPLETED FEATURES
+
+### Frontend / Pages
+- ✅ **Home Page** — Hero, Stats, Subject Categories, Featured Products, Testimonials, CTA
+- ✅ **Shop Page** — Filter by subject/level/curriculum/sort, search, pagination
+- ✅ **Product Detail Page** — Full info, reviews, related guides, buy/cart/wishlist
+- ✅ **About Page** — Mission, values, stats
+- ✅ **How It Works Page** — 5-step guide + FAQ accordion
+- ✅ **Contact Page** — Form + contact info
+- ✅ **Cart Page** — Cart items, promo code, order summary
+- ✅ **Checkout Page** — Secure payment form
+- ✅ **404 & Error Pages**
+
+### Authentication
+- ✅ **User Registration** — Name, email, password, school, level, country
+- ✅ **User Login** — Session-based, remember me
+- ✅ **Logout**
+- ✅ **Forgot Password** page
+
+### Student Account
+- ✅ **Dashboard** — Stats, recent downloads, quick links
+- ✅ **My Downloads** — View & download purchased/free guides
+- ✅ **My Orders** — Full purchase history
+- ✅ **Wishlist** — Save guides for later
+- ✅ **Profile Settings** — Edit name, school, level, country
+- ✅ **Change Password**
+
+### Store / E-Commerce
+- ✅ **Product Catalog** with 10 seed products
+- ✅ **Add to Cart / Remove from Cart**
+- ✅ **Wishlist toggle**
+- ✅ **Checkout & Order creation**
+- ✅ **Free guide instant access**
+- ✅ **Download token system** (max 5 downloads per guide)
+
+### Admin Panel (`/admin`)
+- ✅ **Dashboard** — Revenue, users, orders, top products stats
+- ✅ **Products** — List, add, edit, delete, toggle active
+- ✅ **Add/Edit Guide** — Upload PDF + cover image, set price, curriculum, level
+- ✅ **Orders** — View all orders with items
+- ✅ **Users** — View all students, grant manual download access
+- ✅ **Categories** — View & add categories
+
+### Database (SQLite via better-sqlite3)
+- ✅ users, categories, products, orders, order_items, downloads, cart, reviews, wishlist
+- ✅ Auto-seeded with 10 demo products + admin account
 
 ---
 
-## 🖥️ Hostinger Setup (Node.js Hosting)
+## 🔐 Admin Login
+- **URL:** `/admin`
+- **Email:** `admin@rescuestudyguides.com`
+- **Password:** `Admin@2024!Rescue`
 
-### Step 1: Upload Files
-1. Log into Hostinger Control Panel (hPanel)
-2. Go to **File Manager** or use **FTP** (FileZilla)
-3. Navigate to your domain's folder (e.g., `public_html` or a subdirectory)
-4. Upload ALL files EXCEPT `node_modules/` and `database/*.db`
+> ⚠️ Change these in `.env` before going live!
 
-### Step 2: Set Node.js App in hPanel
-1. Go to **Websites → Manage → Node.js**
-2. Set **Node.js version**: 18.x or higher
-3. Set **Application root**: `/public_html` (or your folder)
-4. Set **Application URL**: your domain
-5. Set **Application startup file**: `app.js`
-6. Click **Create**
+---
 
-### Step 3: Install Dependencies
-In the Node.js terminal in hPanel (or SSH):
+## 📦 HOSTINGER DEPLOYMENT STEPS
+
+### 1. Upload Files
+Upload the **entire project folder** (excluding `node_modules`) to your Hostinger Node.js hosting root. Usually `/home/username/htdocs/rescuestudyguides.com/`
+
+### 2. Set Node.js Version
+In Hostinger Panel → Node.js → Set version to **18+**
+
+### 3. Set Startup File
+In Hostinger Panel → Node.js → Startup file: `app.js`
+
+### 4. Install Dependencies
+In Hostinger SSH terminal:
 ```bash
-cd /home/username/public_html
+cd /home/username/htdocs/rescuestudyguides.com
 npm install --production
 ```
 
-### Step 4: Set Environment Variables
-In hPanel Node.js settings, add these environment variables:
+### 5. Configure Environment Variables
+In Hostinger Panel → Node.js → Environment Variables, add:
 ```
 NODE_ENV=production
+SESSION_SECRET=your-super-secret-random-key-here
 PORT=3000
-SESSION_SECRET=your-super-secret-key-change-this-to-something-random
-DB_PATH=./database/rescuestudyguides.db
 ADMIN_EMAIL=your-admin@email.com
-ADMIN_PASSWORD=YourSecureAdminPassword123!
-APP_NAME=Rescue Study Guides
-APP_URL=https://www.rescuestudyguides.com
+ADMIN_PASSWORD=YourSecurePassword123!
+DB_PATH=./database/rescuestudyguides.db
+UPLOAD_PATH=./public/uploads
 ```
 
-### Step 5: Create Required Directories
+### 6. Initialize Database
 ```bash
-mkdir -p database
-mkdir -p public/uploads/guides
-mkdir -p public/uploads/images
+node database/db.js
 ```
 
-### Step 6: Start the App
-In hPanel Node.js panel, click **Start** or **Restart**
+### 7. Start the App
+In Hostinger Panel → Node.js → **Restart Application**
 
----
-
-## 🔐 Admin Panel Access
-- **URL**: `https://yourdomain.com/admin`
-- **Email**: Set in environment variables (`ADMIN_EMAIL`)
-- **Password**: Set in environment variables (`ADMIN_PASSWORD`)
-
----
-
-## 📤 Uploading Study Guide PDFs
-1. Login as admin
-2. Go to `/admin/products/new`
-3. Fill in guide details
-4. Upload your PDF file (up to 200MB)
-5. Upload a cover image
-6. Click **Publish Guide**
-
-Students can then purchase/download from their account.
-
----
-
-## 🗃️ Database
-- SQLite is used (no MySQL setup needed!)
-- Database auto-creates on first run
-- Located at `./database/rescuestudyguides.db`
-- Backup this file regularly!
-
----
-
-## 📧 Email Setup (Optional - for password reset)
-To enable real email, add to environment variables:
-```
-SMTP_HOST=smtp.hostinger.com
-SMTP_PORT=587
-SMTP_USER=hello@rescuestudyguides.com
-SMTP_PASS=your-email-password
-```
-Then install nodemailer: `npm install nodemailer`
-
----
-
-## 💳 Payment Integration (Production)
-The current checkout is a demo. To add real payments:
-- **Stripe**: Install `stripe` package and add `STRIPE_SECRET_KEY`
-- **PayPal**: Install `paypal-rest-sdk` and add PayPal credentials
-
----
-
-## 🔄 Restart App
-If you make changes, restart via hPanel Node.js panel or SSH:
+Or via SSH:
 ```bash
-pm2 restart rescue-study-guides
-# OR
-node app.js
+npm start
+```
+
+### 8. Set Up Domain
+- Point your domain `rescuestudyguides.com` to Hostinger
+- Enable SSL/HTTPS in Hostinger Panel
+
+---
+
+## 📁 PROJECT STRUCTURE
+```
+rescuestudyguides/
+├── app.js              ← Main server entry point
+├── package.json        ← Dependencies
+├── .env                ← Environment config (DO NOT COMMIT)
+├── .htaccess           ← Apache proxy config
+├── database/
+│   ├── db.js           ← Database init & seed
+│   └── *.db            ← SQLite database files (auto-created)
+├── routes/
+│   ├── store.js        ← Home, Shop, Product pages
+│   ├── auth.js         ← Login, Register, Logout
+│   ├── cart.js         ← Cart, Checkout, Wishlist
+│   ├── downloads.js    ← Download management
+│   ├── account.js      ← Student account pages
+│   └── admin.js        ← Admin panel
+├── middleware/
+│   └── auth.js         ← Auth guards
+├── views/              ← EJS templates
+│   ├── layout.ejs      ← Main layout (nav + footer)
+│   ├── index.ejs       ← Homepage
+│   ├── shop.ejs        ← Shop page
+│   ├── product.ejs     ← Product detail
+│   ├── auth/           ← Login, Register, Forgot password
+│   ├── account/        ← Dashboard, Downloads, Orders, Wishlist, Profile
+│   └── admin/          ← Admin dashboard, products, orders, users
+└── public/
+    ├── css/style.css   ← Custom styles
+    ├── js/main.js      ← Frontend JavaScript
+    └── uploads/        ← Uploaded PDF guides & images
 ```
 
 ---
 
-## 📞 Support
-For help: hello@rescuestudyguides.com
+## 💰 PAYMENTS (TO INTEGRATE)
+Currently checkout is a demo. To take real payments, integrate one of:
+- **Stripe** — Add `stripe` npm package, create payment intent in checkout route
+- **PayPal** — Add `@paypal/checkout-server-sdk`
+- **Paddle** — Great for digital downloads with built-in tax handling
 
 ---
 
-## 🌐 Domain Setup
-1. Point your domain DNS to Hostinger nameservers
-2. Add SSL certificate (free with Hostinger)
-3. Update `APP_URL` environment variable to your domain
+## 📧 EMAIL (TO INTEGRATE)
+For password reset emails, integrate:
+- **Nodemailer** with Gmail SMTP or
+- **SendGrid** (`@sendgrid/mail`) or
+- **Mailgun**
 
 ---
 
-*Built with ❤️ for Rescue Study Guides — Rescue Your Exam Results!*
+## 🌐 Live Preview URL (Sandbox)
+https://3000-itvyzjnd3wz1fjhyh2u45-8f57ffe2.sandbox.novita.ai
