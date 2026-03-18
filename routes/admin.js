@@ -221,3 +221,45 @@ router.post('/categories/add', requireAdmin, (req, res) => {
 });
 
 module.exports = router;
+
+// SETTINGS PAGE
+router.get('/settings', requireAdmin, (req, res) => {
+  const envPath = require('path').join(__dirname, '..', '.env');
+  const envContent = require('fs').existsSync(envPath) ? require('fs').readFileSync(envPath, 'utf8') : '';
+  const settings = {};
+  envContent.split('\n').forEach(line => {
+    const [key, ...val] = line.split('=');
+    if (key && !key.startsWith('#')) settings[key.trim()] = val.join('=').trim();
+  });
+  res.render('admin/settings', { title: 'Settings', settings, saved: req.query.saved === '1' });
+});
+
+router.post('/settings', requireAdmin, (req, res) => {
+  const envPath = require('path').join(__dirname, '..', '.env');
+  const fs = require('fs');
+  let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+  const updates = {
+    STRIPE_PUBLISHABLE_KEY: req.body.STRIPE_PUBLISHABLE_KEY,
+    STRIPE_SECRET_KEY: req.body.STRIPE_SECRET_KEY,
+    PAYPAL_CLIENT_ID: req.body.PAYPAL_CLIENT_ID,
+    PAYPAL_CLIENT_SECRET: req.body.PAYPAL_CLIENT_SECRET,
+    PAYPAL_MODE: req.body.PAYPAL_MODE,
+    APP_URL: req.body.APP_URL,
+    ADMIN_EMAIL: req.body.ADMIN_EMAIL,
+  };
+  if (req.body.ADMIN_PASSWORD) updates.ADMIN_PASSWORD = req.body.ADMIN_PASSWORD;
+
+  Object.entries(updates).forEach(([key, value]) => {
+    if (!value) return;
+    const regex = new RegExp(`^${key}=.*$`, 'm');
+    if (regex.test(envContent)) {
+      envContent = envContent.replace(regex, `${key}=${value}`);
+    } else {
+      envContent += `\n${key}=${value}`;
+    }
+    process.env[key] = value;
+  });
+
+  fs.writeFileSync(envPath, envContent);
+  res.redirect('/admin/settings?saved=1');
+});
