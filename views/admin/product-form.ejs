@@ -109,13 +109,12 @@
                     PDF Study Guide File
                     <% if (product?.file_name) { %><span class="text-green-600 font-normal ml-2">✅ Current: <%= product.file_name %></span><% } %>
                   </label>
-                  <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-rescue-red transition-colors cursor-pointer"
-                    onclick="document.getElementById('pdf_file').click()">
+                  <label for="pdf_file" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-rescue-red transition-colors cursor-pointer block">
                     <i class="fas fa-file-pdf text-3xl text-red-400 mb-2"></i>
                     <p class="text-sm text-gray-600 font-medium">Click to upload PDF (Max 200MB)</p>
                     <p class="text-xs text-gray-400 mt-1">Accepted: .pdf only</p>
-                  </div>
-                  <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" class="hidden" onchange="showFileName(this, 'pdfName')">
+                  </label>
+                  <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" class="hidden">
                   <p id="pdfName" class="text-sm text-green-600 mt-1 hidden"></p>
                 </div>
               </div>
@@ -190,14 +189,3 @@
     </div>
   </main>
 </div>
-
-<script>
-function showFileName(input, targetId) {
-  const target = document.getElementById(targetId);
-  if (input.files[0]) {
-    const size = (input.files[0].size / 1024 / 1024).toFixed(1);
-    target.textContent = `✅ Selected: ${input.files[0].name} (${size}MB)`;
-    target.classList.remove('hidden');
-  }
-}
-</script>

@@ -6,6 +6,7 @@ const db = require('../database/db');
 // LOGIN PAGE
 router.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/account');
+  if (req.query.redirect) req.session.redirectTo = req.query.redirect;
   res.render('auth/login', { title: 'Login - Rescue Study Guides', error: null });
 });
 

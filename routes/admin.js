@@ -72,11 +72,19 @@ router.get('/products/new', requireAdmin, (req, res) => {
 });
 
 // ADD PRODUCT POST
-router.post('/products/new', requireAdmin, upload.fields([
-  { name: 'cover_image', maxCount: 1 },
-  { name: 'preview_image', maxCount: 1 },
-  { name: 'pdf_file', maxCount: 1 }
-]), (req, res) => {
+router.post('/products/new', requireAdmin, (req, res, next) => {
+  upload.fields([
+    { name: 'cover_image', maxCount: 1 },
+    { name: 'preview_image', maxCount: 1 },
+    { name: 'pdf_file', maxCount: 1 }
+  ])(req, res, (err) => {
+    if (err) {
+      req.session.error = 'Upload error: ' + err.message;
+      return res.redirect('/admin/products/new');
+    }
+    next();
+  });
+}, (req, res) => {
   const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free } = req.body;
   
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
@@ -90,7 +98,7 @@ router.post('/products/new', requireAdmin, upload.fields([
     previewImage = '/uploads/images/' + req.files.preview_image[0].filename;
   }
   if (req.files?.pdf_file?.[0]) {
-    filePath = '/public/uploads/guides/' + req.files.pdf_file[0].filename;
+    filePath = '/uploads/guides/' + req.files.pdf_file[0].filename;
     fileName = req.files.pdf_file[0].originalname;
     fileSize = req.files.pdf_file[0].size;
   }
@@ -113,11 +121,19 @@ router.get('/products/edit/:id', requireAdmin, (req, res) => {
 });
 
 // EDIT PRODUCT POST
-router.post('/products/edit/:id', requireAdmin, upload.fields([
-  { name: 'cover_image', maxCount: 1 },
-  { name: 'preview_image', maxCount: 1 },
-  { name: 'pdf_file', maxCount: 1 }
-]), (req, res) => {
+router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
+  upload.fields([
+    { name: 'cover_image', maxCount: 1 },
+    { name: 'preview_image', maxCount: 1 },
+    { name: 'pdf_file', maxCount: 1 }
+  ])(req, res, (err) => {
+    if (err) {
+      req.session.error = 'Upload error: ' + err.message;
+      return res.redirect('/admin/products/edit/' + req.params.id);
+    }
+    next();
+  });
+}, (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.redirect('/admin/products');
 
@@ -136,7 +152,7 @@ router.post('/products/edit/:id', requireAdmin, upload.fields([
     previewImage = '/uploads/images/' + req.files.preview_image[0].filename;
   }
   if (req.files?.pdf_file?.[0]) {
-    filePath = '/public/uploads/guides/' + req.files.pdf_file[0].filename;
+    filePath = '/uploads/guides/' + req.files.pdf_file[0].filename;
     fileName = req.files.pdf_file[0].originalname;
     fileSize = req.files.pdf_file[0].size;
   }

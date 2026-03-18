@@ -48,7 +48,7 @@ router.get('/file/:token', requireAuth, (req, res) => {
     return res.redirect('/account/downloads');
   }
 
-  const filePath = path.join(__dirname, '..', download.file_path);
+  const filePath = path.join(__dirname, '..', 'public', download.file_path);
   
   if (!fs.existsSync(filePath)) {
     req.session.error = 'File temporarily unavailable. Please contact support.';
