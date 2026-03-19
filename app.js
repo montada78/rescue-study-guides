@@ -9,6 +9,12 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const fs = require('fs');
 
+// Ensure upload directories exist (needed on Railway/fresh deployments)
+['public/uploads/guides', 'public/uploads/images', 'database'].forEach(dir => {
+  const fullPath = path.join(__dirname, dir);
+  if (!fs.existsSync(fullPath)) fs.mkdirSync(fullPath, { recursive: true });
+});
+
 // Initialize DB
 const db = require('./database/db');
 
