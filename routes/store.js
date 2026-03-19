@@ -136,7 +136,34 @@ router.get('/contact', (req, res) => {
 
 // HOW IT WORKS
 router.get('/how-it-works', (req, res) => {
-  res.render('how-it-works', { title: 'How It Works - Rescue Study Guides' });
+  res.render('how-it-works', { title: 'How It Works - Exam Rescue Guides' });
+});
+
+// FREE GUIDES PAGE
+router.get('/free', (req, res) => {
+  const { subject } = req.query;
+  let where = 'WHERE p.is_free = 1 AND p.is_active = 1';
+  let params = [];
+  if (subject && subject !== 'all') {
+    where += ' AND LOWER(p.subject) = LOWER(?)';
+    params.push(subject);
+  }
+  const freeGuides = db.prepare(`
+    SELECT p.*, c.name as category_name, c.color as category_color
+    FROM products p LEFT JOIN categories c ON p.category_id = c.id
+    ${where} ORDER BY p.created_at DESC
+  `).all(...params);
+
+  const subjects = db.prepare(`
+    SELECT DISTINCT p.subject FROM products p WHERE p.is_free = 1 AND p.is_active = 1 ORDER BY p.subject
+  `).all().map(r => r.subject);
+
+  res.render('free', {
+    title: 'Free Study Guides - Exam Rescue Guides',
+    freeGuides,
+    subjects,
+    currentSubject: subject || 'all'
+  });
 });
 
 module.exports = router;

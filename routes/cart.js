@@ -3,6 +3,54 @@ const router = express.Router();
 const db = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
 
+// APPLY COUPON (AJAX)
+router.post('/coupon/apply', requireAuth, (req, res) => {
+  const code = (req.body.code || '').trim().toUpperCase();
+  if (!code) return res.json({ success: false, message: 'Enter a coupon code.' });
+
+  const coupon = db.prepare(`
+    SELECT * FROM coupons
+    WHERE code = ? AND is_active = 1
+    AND (expires_at IS NULL OR expires_at > datetime('now'))
+    AND (max_uses IS NULL OR uses_count < max_uses)
+  `).get(code);
+
+  if (!coupon) return res.json({ success: false, message: 'Invalid or expired coupon code.' });
+
+  // Get cart total
+  const cartItems = db.prepare(`
+    SELECT p.price FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ?
+  `).all(req.session.user.id);
+  const subtotal = cartItems.reduce((s, i) => s + i.price, 0);
+
+  if (subtotal < coupon.min_order) {
+    return res.json({ success: false, message: `Minimum order of $${coupon.min_order.toFixed(2)} required.` });
+  }
+
+  const discount = coupon.type === 'percent'
+    ? parseFloat((subtotal * coupon.value / 100).toFixed(2))
+    : Math.min(coupon.value, subtotal);
+
+  const newTotal = Math.max(0, subtotal - discount);
+
+  // Store in session
+  req.session.coupon = { code: coupon.code, type: coupon.type, value: coupon.value, discount, id: coupon.id };
+
+  return res.json({
+    success: true,
+    message: `✅ Code applied! You saved $${discount.toFixed(2)}`,
+    discount: discount.toFixed(2),
+    newTotal: newTotal.toFixed(2),
+    label: coupon.type === 'percent' ? `${coupon.value}% OFF` : `$${coupon.value} OFF`
+  });
+});
+
+// REMOVE COUPON
+router.post('/coupon/remove', requireAuth, (req, res) => {
+  req.session.coupon = null;
+  res.json({ success: true });
+});
+
 // VIEW CART
 router.get('/', requireAuth, (req, res) => {
   const cartItems = db.prepare(`
@@ -13,8 +61,11 @@ router.get('/', requireAuth, (req, res) => {
     WHERE c.user_id = ?
   `).all(req.session.user.id);
 
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
-  res.render('cart', { title: 'Shopping Cart - Rescue Study Guides', cartItems, total });
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const coupon = req.session.coupon || null;
+  const discount = coupon ? coupon.discount : 0;
+  const total = Math.max(0, subtotal - discount);
+  res.render('cart', { title: 'Shopping Cart - Exam Rescue Guides', cartItems, subtotal, total, discount, coupon });
 });
 
 // ADD TO CART
@@ -78,8 +129,11 @@ router.get('/checkout', requireAuth, (req, res) => {
 
   if (cartItems.length === 0) return res.redirect('/cart');
 
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
-  res.render('checkout', { title: 'Checkout - Rescue Study Guides', cartItems, total });
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const coupon = req.session.coupon || null;
+  const discount = coupon ? coupon.discount : 0;
+  const total = Math.max(0, subtotal - discount);
+  res.render('checkout', { title: 'Checkout - Exam Rescue Guides', cartItems, subtotal, total, discount, coupon });
 });
 
 // PROCESS ORDER (Demo - in production integrate Stripe/PayPal)
@@ -92,7 +146,10 @@ router.post('/checkout/process', requireAuth, (req, res) => {
 
   if (cartItems.length === 0) return res.redirect('/cart');
 
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const coupon = req.session.coupon || null;
+  const discount = coupon ? coupon.discount : 0;
+  const total = Math.max(0, subtotal - discount);
   const orderNumber = 'RSG-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
 
   // Create order
@@ -113,8 +170,14 @@ router.post('/checkout/process', requireAuth, (req, res) => {
     `).run(req.session.user.id, product.id, orderId, uuidv4());
   });
 
-  // Clear cart
+  // Increment coupon uses
+  if (coupon && coupon.id) {
+    db.prepare('UPDATE coupons SET uses_count = uses_count + 1 WHERE id = ?').run(coupon.id);
+  }
+
+  // Clear cart and coupon session
   db.prepare('DELETE FROM cart WHERE user_id = ?').run(req.session.user.id);
+  req.session.coupon = null;
 
   req.session.success = `Order ${orderNumber} placed successfully! Your guides are ready to download. 🎉`;
   res.redirect('/account/downloads');

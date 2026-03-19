@@ -154,6 +154,19 @@ const initDB = () => {
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
+
+    CREATE TABLE IF NOT EXISTS coupons (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      type TEXT NOT NULL DEFAULT 'percent' CHECK(type IN ('percent','fixed')),
+      value REAL NOT NULL,
+      min_order REAL DEFAULT 0,
+      max_uses INTEGER DEFAULT NULL,
+      uses_count INTEGER DEFAULT 0,
+      expires_at DATETIME DEFAULT NULL,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   console.log('✅ Database tables created/verified');

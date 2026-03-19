@@ -171,22 +171,39 @@
             <!-- Status -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h3 class="font-bold text-gray-700 mb-4">⚙️ Settings</h3>
-              <div class="space-y-3">
-                <label class="flex items-center justify-between cursor-pointer">
-                  <span class="text-sm text-gray-700">Active / Published</span>
-                  <div class="relative">
-                    <input type="checkbox" name="is_active" <%= !product || product.is_active ? 'checked' : '' %> class="sr-only peer">
-                    <div class="w-10 h-6 bg-gray-200 rounded-full peer-checked:bg-rescue-red transition-colors peer peer-focus:ring-2 peer-focus:ring-rescue-red/30 cursor-pointer" onclick="this.previousElementSibling.click()"></div>
-                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 pointer-events-none"></div>
-                  </div>
-                </label>
+              <div class="space-y-4">
+
+                <!-- Active/Published — plain JS toggle, no Tailwind peer magic -->
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-semibold text-gray-700">Active / Published</span>
+                  <% var isActive = (!product || product.is_active) ? true : false; %>
+                  <input type="hidden" name="is_active" id="isActiveHidden" value="<%= isActive ? 'on' : '' %>">
+                  <button type="button" id="toggleActive"
+                    onclick="(function(){
+                      var btn = document.getElementById('toggleActive');
+                      var inp = document.getElementById('isActiveHidden');
+                      var on  = inp.value === 'on';
+                      inp.value = on ? '' : 'on';
+                      btn.style.background  = on ? '#d1d5db' : '#E63946';
+                      btn.style.justifyContent = on ? 'flex-start' : 'flex-end';
+                      btn.querySelector('span').style.transform = on ? 'translateX(0)' : 'translateX(0)';
+                      btn.title = on ? 'Currently INACTIVE — click to activate' : 'Currently ACTIVE — click to deactivate';
+                      document.getElementById('activeLabel').textContent = on ? '❌ Inactive' : '✅ Active';
+                    })()"
+                    title="<%= isActive ? 'Currently ACTIVE — click to deactivate' : 'Currently INACTIVE — click to activate' %>"
+                    style="display:flex;align-items:center;justify-content:<%= isActive ? 'flex-end' : 'flex-start' %>;width:52px;height:28px;border-radius:999px;border:none;cursor:pointer;padding:3px;background:<%= isActive ? '#E63946' : '#d1d5db' %>;transition:background 0.2s;">
+                    <span style="width:22px;height:22px;background:white;border-radius:50%;display:block;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>
+                  </button>
+                </div>
+                <p id="activeLabel" class="text-xs mt-1 font-semibold <%= isActive ? 'text-green-600' : 'text-gray-400' %>"><%= isActive ? '✅ Active' : '❌ Inactive' %></p>
+
                 <label class="flex items-center justify-between cursor-pointer">
                   <span class="text-sm text-gray-700">Featured on Homepage</span>
-                  <input type="checkbox" name="is_featured" <%= product?.is_featured ? 'checked' : '' %> class="w-4 h-4 rounded accent-rescue-red">
+                  <input type="checkbox" name="is_featured" <%= product?.is_featured ? 'checked' : '' %> class="w-5 h-5 rounded accent-rescue-red cursor-pointer">
                 </label>
                 <label class="flex items-center justify-between cursor-pointer">
                   <span class="text-sm text-gray-700">Free Download</span>
-                  <input type="checkbox" name="is_free" <%= product?.is_free ? 'checked' : '' %> class="w-4 h-4 rounded accent-rescue-red">
+                  <input type="checkbox" name="is_free" <%= product?.is_free ? 'checked' : '' %> class="w-5 h-5 rounded accent-rescue-red cursor-pointer">
                 </label>
               </div>
             </div>

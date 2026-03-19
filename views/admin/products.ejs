@@ -40,6 +40,7 @@
                 <th class="px-4 py-4">Subject</th>
                 <th class="px-4 py-4">Level</th>
                 <th class="px-4 py-4">Price</th>
+                <th class="px-4 py-4">File</th>
                 <th class="px-4 py-4">Downloads</th>
                 <th class="px-4 py-4">Status</th>
                 <th class="px-4 py-4">Actions</th>
@@ -68,6 +69,17 @@
                     <span class="font-bold text-green-600">FREE</span>
                   <% } else { %>
                     <span class="font-bold text-rescue-red">$<%= product.price.toFixed(2) %></span>
+                  <% } %>
+                </td>
+                <td class="px-4 py-4">
+                  <% if (product.file_name) { %>
+                    <span class="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-medium">
+                      <i class="fas fa-file-pdf"></i> PDF ✅
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1 text-xs bg-red-100 text-red-500 px-2.5 py-1 rounded-full font-medium">
+                      <i class="fas fa-times"></i> No file
+                    </span>
                   <% } %>
                 </td>
                 <td class="px-4 py-4 text-gray-600"><%= product.downloads_count %></td>

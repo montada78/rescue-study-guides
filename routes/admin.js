@@ -249,8 +249,6 @@ router.post('/categories/add', requireAdmin, (req, res) => {
   res.redirect('/admin/categories');
 });
 
-module.exports = router;
-
 // SETTINGS PAGE
 router.get('/settings', requireAdmin, (req, res) => {
   const envPath = require('path').join(__dirname, '..', '.env');
@@ -292,3 +290,55 @@ router.post('/settings', requireAdmin, (req, res) => {
   fs.writeFileSync(envPath, envContent);
   res.redirect('/admin/settings?saved=1');
 });
+
+
+// ── COUPON MANAGEMENT ─────────────────────────────────────────────────────────
+
+// List coupons
+router.get('/coupons', requireAdmin, (req, res) => {
+  const coupons = db.prepare('SELECT * FROM coupons ORDER BY created_at DESC').all();
+  res.render('admin/coupons', { title: 'Coupon Codes - Admin', coupons });
+});
+
+// Create coupon
+router.post('/coupons/create', requireAdmin, (req, res) => {
+  const { code, type, value, min_order, max_uses, expires_at } = req.body;
+  if (!code || !type || !value) {
+    req.session.error = 'Code, type and value are required.';
+    return res.redirect('/admin/coupons');
+  }
+  try {
+    db.prepare(`
+      INSERT INTO coupons (code, type, value, min_order, max_uses, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      code.trim().toUpperCase(),
+      type,
+      parseFloat(value),
+      parseFloat(min_order) || 0,
+      max_uses ? parseInt(max_uses) : null,
+      expires_at || null
+    );
+    req.session.success = `Coupon ${code.toUpperCase()} created!`;
+  } catch(e) {
+    req.session.error = 'Coupon code already exists.';
+  }
+  res.redirect('/admin/coupons');
+});
+
+// Toggle coupon active
+router.post('/coupons/toggle/:id', requireAdmin, (req, res) => {
+  const c = db.prepare('SELECT is_active FROM coupons WHERE id = ?').get(req.params.id);
+  if (!c) return res.json({ success: false });
+  db.prepare('UPDATE coupons SET is_active = ? WHERE id = ?').run(c.is_active ? 0 : 1, req.params.id);
+  res.json({ success: true, active: !c.is_active });
+});
+
+// Delete coupon
+router.post('/coupons/delete/:id', requireAdmin, (req, res) => {
+  db.prepare('DELETE FROM coupons WHERE id = ?').run(req.params.id);
+  req.session.success = 'Coupon deleted.';
+  res.redirect('/admin/coupons');
+});
+
+module.exports = router;
