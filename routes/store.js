@@ -127,6 +127,45 @@ router.get('/product/:slug', (req, res) => {
   res.render('product', { title: `${product.title} - Exam Rescue Guides`, product, reviews, related, inCart, inWishlist, owned, productFiles, productPreviews });
 });
 
+// SUBMIT REVIEW (with simple math captcha)
+router.post('/product/:slug/review', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+
+  const product = db.prepare('SELECT id FROM products WHERE slug = ? AND is_active = 1').get(req.params.slug);
+  if (!product) return res.redirect('/shop');
+
+  const { rating, comment, captcha_answer, captcha_a, captcha_b } = req.body;
+  const ratingNum = parseInt(rating);
+
+  // Validate CAPTCHA
+  const expectedAnswer = parseInt(captcha_a) + parseInt(captcha_b);
+  if (parseInt(captcha_answer) !== expectedAnswer) {
+    req.session.error = 'Incorrect CAPTCHA answer — please try again.';
+    return res.redirect('/product/' + req.params.slug);
+  }
+
+  if (!ratingNum || ratingNum < 1 || ratingNum > 5) {
+    req.session.error = 'Please select a rating between 1 and 5 stars.';
+    return res.redirect('/product/' + req.params.slug);
+  }
+
+  // Prevent duplicate review
+  const existing = db.prepare('SELECT id FROM reviews WHERE user_id = ? AND product_id = ?')
+    .get(req.session.user.id, product.id);
+  if (existing) {
+    req.session.error = 'You have already reviewed this guide.';
+    return res.redirect('/product/' + req.params.slug);
+  }
+
+  db.prepare('INSERT INTO reviews (user_id, product_id, rating, comment, is_approved) VALUES (?, ?, ?, ?, 1)')
+    .run(req.session.user.id, product.id, ratingNum, comment ? comment.trim() : null);
+
+  req.session.success = '⭐ Thank you for your review!';
+  res.redirect('/product/' + req.params.slug);
+});
+
 // ABOUT PAGE
 router.get('/about', (req, res) => {
   res.render('about', { title: 'About Us - Rescue Study Guides' });

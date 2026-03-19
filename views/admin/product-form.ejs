@@ -26,7 +26,7 @@
     </div>
 
     <div class="p-8">
-      <form id="productForm" action="/admin/products/<%= product ? 'edit/' + product.id : 'new' %>" method="POST" enctype="multipart/form-data">
+      <form id="productForm" action="/admin/products/<%= product ? 'edit/' + product.id : 'new' %>" method="POST" enctype="multipart/form-data" data-product-id="<%= product ? product.id : '' %>">
         <div class="grid lg:grid-cols-3 gap-6">
           
           <!-- Main Fields -->
@@ -181,28 +181,33 @@
             </div>
 
             <!-- Preview Images Upload -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 preview-upload-section">
               <h3 class="font-bold text-gray-700 mb-4">🖼️ Page Preview Images</h3>
-              <p class="text-xs text-gray-400 mb-3">Upload sample pages/screenshots so students can preview the guide before buying.</p>
+              <p class="text-xs text-gray-400 mb-3">Upload sample pages/screenshots so students can preview the guide before buying. Select images then click <strong>Upload Files Now</strong> above.</p>
 
               <!-- Existing previews -->
               <% if (typeof productPreviews !== 'undefined' && productPreviews.length > 0) { %>
               <div class="grid grid-cols-3 gap-2 mb-4" id="existingPreviewsList">
                 <% productPreviews.forEach(function(p) { %>
-                <div class="relative group" id="prev-<%= p.id %>">
-                  <img src="<%= p.image_path %>" class="w-full h-24 object-cover rounded-xl border border-gray-200">
+                <div class="relative" id="prev-<%= p.id %>" style="display:inline-block;width:100%;">
+                  <img src="<%= p.image_path %>" alt="preview" style="width:100%;height:96px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;display:block;">
                   <button type="button" onclick="deletePreview(<%= p.id %>, 'prev-<%= p.id %>')"
-                    class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">
+                    style="position:absolute;top:4px;right:4px;width:22px;height:22px;background:#ef4444;color:white;border:none;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.3);">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
                 <% }) %>
               </div>
+              <% } else { %>
+              <div class="grid grid-cols-3 gap-2 mb-4" id="existingPreviewsList" style="display:none;"></div>
               <% } %>
 
-              <input type="file" name="preview_images" accept="image/*" multiple
-                class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 cursor-pointer border border-dashed border-gray-300 rounded-xl p-3">
-              <p class="text-xs text-gray-400 mt-1">JPG/PNG · Multiple allowed · Max 5 MB each</p>
+              <label style="display:block;border:2px dashed #d1d5db;border-radius:12px;padding:12px;cursor:pointer;text-align:center;" for="preview_images_input">
+                <i class="fas fa-images text-2xl text-blue-300 mb-1 block"></i>
+                <span style="font-size:0.8rem;color:#6b7280;">Click to choose preview images (JPG/PNG · Multiple · Max 5 MB each)</span>
+                <input type="file" name="preview_images" id="preview_images_input" accept="image/*" multiple style="display:none;">
+              </label>
+              <p class="text-xs text-gray-400 mt-2">After choosing files, click <strong>Upload Files Now</strong> in the PDF section above ↑</p>
             </div>
           </div>
 
@@ -250,7 +255,7 @@
                       inp.value = on ? '' : 'on';
                       btn.style.background  = on ? '#d1d5db' : '#E63946';
                       btn.style.justifyContent = on ? 'flex-start' : 'flex-end';
-                      btn.querySelector('span').style.transform = on ? 'translateX(0)' : 'translateX(0)';
+                      btn.querySelector('span').style.marginLeft = on ? '0' : 'auto';
                       btn.title = on ? 'Currently INACTIVE — click to activate' : 'Currently ACTIVE — click to deactivate';
                       document.getElementById('activeLabel').textContent = on ? '❌ Inactive' : '✅ Active';
                     })()"

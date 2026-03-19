@@ -11,7 +11,7 @@ const { requireAdmin } = require('../middleware/auth');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadDir;
-    if (file.fieldname === 'pdf_file') {
+    if (file.fieldname === 'pdf_files') {
       uploadDir = path.join(__dirname, '..', 'public', 'uploads', 'guides');
     } else {
       uploadDir = path.join(__dirname, '..', 'public', 'uploads', 'images');
@@ -29,7 +29,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
   fileFilter: (req, file, cb) => {
-    if (file.fieldname === 'pdf_file') {
+    if (file.fieldname === 'pdf_files') {
       if (file.mimetype === 'application/pdf') return cb(null, true);
       return cb(new Error('Only PDF files allowed'));
     }
@@ -211,6 +211,59 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   }
   res.redirect('/admin/products/edit/' + product.id);
 });
+
+// ── DEDICATED FILE UPLOAD ENDPOINT ────────────────────────────────────────
+// Two routes: one for new products (no id yet), one for existing
+function _handleFileUpload(req, res) {
+  const productId = req.params.productId ? parseInt(req.params.productId) : null;
+  const savedPdfs = [];
+  const savedPreviews = [];
+
+  if (req.files?.pdf_files) {
+    req.files.pdf_files.forEach((f, i) => {
+      const filePath = '/uploads/guides/' + f.filename;
+      const row = { file_path: filePath, file_name: f.originalname, file_size: f.size };
+      if (productId) {
+        const existing = db.prepare('SELECT COUNT(*) as c FROM product_files WHERE product_id = ?').get(productId).c;
+        const result = db.prepare('INSERT INTO product_files (product_id, file_path, file_name, file_size, sort_order) VALUES (?,?,?,?,?)')
+          .run(productId, filePath, f.originalname, f.size, existing + i);
+        row.id = result.lastInsertRowid;
+      }
+      savedPdfs.push(row);
+    });
+  }
+
+  if (req.files?.preview_images) {
+    req.files.preview_images.forEach((f, i) => {
+      const imgPath = '/uploads/images/' + f.filename;
+      const row = { image_path: imgPath };
+      if (productId) {
+        const existing = db.prepare('SELECT COUNT(*) as c FROM product_previews WHERE product_id = ?').get(productId).c;
+        const result = db.prepare('INSERT INTO product_previews (product_id, image_path, sort_order) VALUES (?,?,?)')
+          .run(productId, imgPath, existing + i);
+        row.id = result.lastInsertRowid;
+      }
+      savedPreviews.push(row);
+    });
+  }
+
+  return res.json({ success: true, pdfs: savedPdfs, previews: savedPreviews });
+}
+
+const _uploadMiddleware = (req, res, next) => {
+  upload.fields([
+    { name: 'pdf_files', maxCount: 10 },
+    { name: 'preview_images', maxCount: 10 }
+  ])(req, res, (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message });
+    next();
+  });
+};
+
+// Upload with existing product id
+router.post('/products/upload-files/:productId', requireAdmin, _uploadMiddleware, _handleFileUpload);
+// Upload for new product (files saved but not linked yet — JS keeps them client-side until form save)
+router.post('/products/upload-files', requireAdmin, _uploadMiddleware, _handleFileUpload);
 
 // TOGGLE PRODUCT STATUS
 router.post('/products/toggle/:id', requireAdmin, (req, res) => {

@@ -138,7 +138,7 @@
           <p>No reviews yet — be the first!</p>
         </div>
         <% } else { %>
-        <div class="space-y-4">
+        <div class="space-y-4 mb-8">
           <% reviews.forEach(review => { %>
           <div class="testimonial-card">
             <div class="flex items-start justify-between mb-2">
@@ -154,6 +154,83 @@
             <% if (review.comment) { %><p class="text-sm text-gray-600 italic">"<%= review.comment %>"</p><% } %>
           </div>
           <% }) %>
+        </div>
+        <% } %>
+
+        <!-- Write a Review Form -->
+        <% if (isLoggedIn) { %>
+        <%
+          var ca = Math.floor(Math.random() * 9) + 1;
+          var cb = Math.floor(Math.random() * 9) + 1;
+        %>
+        <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200 mt-4">
+          <h4 class="font-bold text-gray-800 mb-4">✍️ Write a Review</h4>
+          <form action="/product/<%= product.slug %>/review" method="POST">
+            <!-- Star rating -->
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating *</label>
+              <div class="flex gap-2" id="starRating">
+                <% for (var s = 1; s <= 5; s++) { %>
+                <label style="cursor:pointer;font-size:1.8rem;color:#d1d5db;transition:color 0.15s;" 
+                  onmouseover="highlightStars(<%= s %>)" onmouseout="resetStars()" onclick="selectStar(<%= s %>)">
+                  <input type="radio" name="rating" value="<%= s %>" style="display:none;" id="star<%= s %>">
+                  ★
+                </label>
+                <% } %>
+              </div>
+              <p class="text-xs text-gray-400 mt-1" id="starLabel">Click a star to rate</p>
+            </div>
+
+            <!-- Comment -->
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Comment <span class="font-normal text-gray-400">(optional)</span></label>
+              <textarea name="comment" rows="3" placeholder="Share your experience with this guide..." 
+                style="width:100%;border:1px solid #d1d5db;border-radius:12px;padding:12px;font-size:0.875rem;resize:none;outline:none;" 
+                onfocus="this.style.borderColor='#E63946'" onblur="this.style.borderColor='#d1d5db'"></textarea>
+            </div>
+
+            <!-- Math CAPTCHA -->
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                🤖 Prove you're human: What is <strong><%= ca %> + <%= cb %></strong>?
+              </label>
+              <input type="number" name="captcha_answer" required placeholder="Your answer"
+                style="width:140px;border:1px solid #d1d5db;border-radius:10px;padding:8px 12px;font-size:0.875rem;outline:none;"
+                onfocus="this.style.borderColor='#E63946'" onblur="this.style.borderColor='#d1d5db'">
+              <input type="hidden" name="captcha_a" value="<%= ca %>">
+              <input type="hidden" name="captcha_b" value="<%= cb %>">
+            </div>
+
+            <button type="submit" 
+              style="background:#E63946;color:white;border:none;padding:10px 24px;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.9rem;">
+              <i class="fas fa-star mr-2"></i>Submit Review
+            </button>
+          </form>
+        </div>
+
+        <script>
+        var _selectedStar = 0;
+        function highlightStars(n) {
+          var labels = document.querySelectorAll('#starRating label');
+          labels.forEach(function(l, i) { l.style.color = i < n ? '#f59e0b' : '#d1d5db'; });
+        }
+        function resetStars() {
+          var labels = document.querySelectorAll('#starRating label');
+          labels.forEach(function(l, i) { l.style.color = i < _selectedStar ? '#f59e0b' : '#d1d5db'; });
+        }
+        function selectStar(n) {
+          _selectedStar = n;
+          document.getElementById('star' + n).checked = true;
+          var labels = ['Terrible','Poor','Okay','Good','Excellent'];
+          document.getElementById('starLabel').textContent = '★'.repeat(n) + ' — ' + labels[n-1];
+          resetStars();
+        }
+        </script>
+        <% } else { %>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center mt-4">
+          <p class="text-blue-700 text-sm font-medium">
+            <a href="/auth/login" class="underline font-bold">Sign in</a> to write a review
+          </p>
         </div>
         <% } %>
       </div>
