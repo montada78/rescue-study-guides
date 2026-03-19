@@ -72,7 +72,7 @@
                   <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Curriculum</label>
                     <select name="curriculum" class="form-input">
-                      <% ['IGCSE Cambridge', 'AP College Board', 'SABIS', 'American Curriculum', 'IB', 'Edexcel', 'General'].forEach(c => { %>
+                      <% ['IGCSE Cambridge', 'AP College Board', 'SABIS', 'American Curriculum', 'IB', 'Edexcel', 'Pre-Med / Medicine', 'Pre-Pharmacy', 'Pre-Engineering', 'University Foundation', 'Other'].forEach(c => { %>
                       <option value="<%= c %>" <%= product?.curriculum === c ? 'selected' : '' %>><%= c %></option>
                       <% }) %>
                     </select>
