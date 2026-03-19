@@ -30,7 +30,7 @@ function cached(key, ttlMs, fn) {
 global.dbCached = cached; // make available in routes
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || process.env.RAILWAY_PORT || 3000;
 
 // Trust proxy for Hostinger
 app.set('trust proxy', 1);
