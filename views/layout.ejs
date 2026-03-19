@@ -4,23 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-  <meta name="description" content="Rescue Study Guides - High-quality, colorful revision guides for IGCSE, AP, SABIS and more. Rescue your exam results today!">
+
+  <!-- SEO Meta -->
+  <meta name="description" content="<%= typeof metaDesc !== 'undefined' ? metaDesc : 'Rescue Study Guides – High-quality, colorful revision guides for IGCSE, AP, SABIS & American curriculum. Rescue your exam results today!' %>">
+  <meta name="keywords" content="<%= typeof metaKeywords !== 'undefined' ? metaKeywords : 'IGCSE revision guides, AP chemistry notes, SABIS study guides, exam rescue, study materials, chemistry revision' %>">
+  <meta name="author" content="Exam Rescue Guides">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://examrescueguides.com<%= typeof canonicalPath !== 'undefined' ? canonicalPath : '' %>">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
+  <meta property="og:title" content="<%= title %>">
+  <meta property="og:description" content="<%= typeof metaDesc !== 'undefined' ? metaDesc : 'High-quality revision guides for IGCSE, AP, SABIS & more.' %>">
+  <meta property="og:image" content="<%= typeof ogImage !== 'undefined' ? ogImage : 'https://examrescueguides.com/images/og-default.png' %>">
+  <meta property="og:url" content="https://examrescueguides.com<%= typeof canonicalPath !== 'undefined' ? canonicalPath : '' %>">
+  <meta property="og:site_name" content="Exam Rescue Guides">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= title %>">
+  <meta name="twitter:description" content="<%= typeof metaDesc !== 'undefined' ? metaDesc : 'High-quality revision guides for IGCSE, AP, SABIS & more.' %>">
+  <meta name="twitter:image" content="<%= typeof ogImage !== 'undefined' ? ogImage : 'https://examrescueguides.com/images/og-default.png' %>">
+
+  <!-- JSON-LD Structured Data -->
+  <% if (typeof jsonLd !== 'undefined') { %>
+  <script type="application/ld+json"><%- jsonLd %></script>
+  <% } else { %>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Exam Rescue Guides","url":"https://examrescueguides.com","logo":"https://examrescueguides.com/favicon.svg","contactPoint":{"@type":"ContactPoint","email":"support@examrescueguides.com","contactType":"customer support"},"sameAs":["https://examrescueguides.com"]}
+  </script>
+  <% } %>
+
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="shortcut icon" href="/favicon.svg">
-  
-  <!-- Tailwind CSS (local build - fast!) -->
+
+  <!-- Critical CSS inline for instant render -->
+  <style>body{margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;background:#fff}nav{background:#fff}.font-display{font-family:Poppins,Inter,sans-serif}</style>
+
+  <!-- Preconnect for speed -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+  <!-- Tailwind CSS -->
   <link href="/css/tailwind.css" rel="stylesheet">
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  
   <!-- Custom CSS -->
   <link href="/css/style.css" rel="stylesheet">
-  
-  <!-- Tailwind config applied via local CSS build -->
+
+  <!-- Google Fonts — non-blocking -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" media="print" onload="this.media='all'">
+
+  <!-- Font Awesome — non-blocking -->
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </noscript>
 </head>
 <body class="bg-white font-sans">
   <!-- Top Banner -->

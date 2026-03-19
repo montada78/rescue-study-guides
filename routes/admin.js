@@ -71,17 +71,10 @@ router.get('/products/new', requireAdmin, (req, res) => {
   res.render('admin/product-form', { title: 'Add New Product', product: null, categories, productFiles: [], productPreviews: [] });
 });
 
-// ADD PRODUCT POST
+// ADD PRODUCT POST — cover image only; PDFs/previews use dedicated upload endpoint
 router.post('/products/new', requireAdmin, (req, res, next) => {
-  upload.fields([
-    { name: 'cover_image', maxCount: 1 },
-    { name: 'preview_images', maxCount: 10 },
-    { name: 'pdf_files', maxCount: 10 }
-  ])(req, res, (err) => {
+  upload.fields([{ name: 'cover_image', maxCount: 1 }])(req, res, (err) => {
     if (err) {
-      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-        return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
-      }
       req.session.error = 'Upload error: ' + err.message;
       return res.redirect('/admin/products/new');
     }
@@ -89,50 +82,18 @@ router.post('/products/new', requireAdmin, (req, res, next) => {
   });
 }, (req, res) => {
   const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free } = req.body;
-  
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
-  
   let coverImage = null;
-  // Keep legacy single-file fields for backward compat
-  let filePath = null, fileName = null, fileSize = 0;
-  
   if (req.files?.cover_image?.[0]) {
     coverImage = '/uploads/images/' + req.files.cover_image[0].filename;
   }
-  // Primary pdf (first one) for legacy field
-  if (req.files?.pdf_files?.[0]) {
-    filePath = '/uploads/guides/' + req.files.pdf_files[0].filename;
-    fileName = req.files.pdf_files[0].originalname;
-    fileSize = req.files.pdf_files[0].size;
-  }
-
   const result = db.prepare(`
-    INSERT INTO products (title, slug, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, cover_image, file_path, file_name, file_size, is_featured, is_active, is_free, tags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags);
+    INSERT INTO products (title, slug, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, cover_image, is_featured, is_active, is_free, tags)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags);
 
-  const productId = result.lastInsertRowid;
-
-  // Save all PDF files to product_files table
-  if (req.files?.pdf_files) {
-    req.files.pdf_files.forEach((f, i) => {
-      db.prepare('INSERT INTO product_files (product_id, file_path, file_name, file_size, sort_order) VALUES (?,?,?,?,?)')
-        .run(productId, '/uploads/guides/' + f.filename, f.originalname, f.size, i);
-    });
-  }
-  // Save all preview images to product_previews table
-  if (req.files?.preview_images) {
-    req.files.preview_images.forEach((f, i) => {
-      db.prepare('INSERT INTO product_previews (product_id, image_path, sort_order) VALUES (?,?,?)')
-        .run(productId, '/uploads/images/' + f.filename, i);
-    });
-  }
-
-  req.session.success = 'Product added successfully!';
-  if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-    return res.json({ success: true, redirect: '/admin/products', message: 'Product saved successfully!' });
-  }
-  res.redirect('/admin/products');
+  req.session.success = 'Product added! Now upload PDF files and preview images using the Upload button.';
+  res.redirect('/admin/products/edit/' + result.lastInsertRowid);
 });
 
 // EDIT PRODUCT PAGE
@@ -145,17 +106,12 @@ router.get('/products/edit/:id', requireAdmin, (req, res) => {
   res.render('admin/product-form', { title: 'Edit Product', product, categories, productFiles, productPreviews });
 });
 
-// EDIT PRODUCT POST
+// EDIT PRODUCT POST — cover image only via multer; PDFs/previews use dedicated upload endpoint
 router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   upload.fields([
-    { name: 'cover_image', maxCount: 1 },
-    { name: 'preview_images', maxCount: 10 },
-    { name: 'pdf_files', maxCount: 10 }
+    { name: 'cover_image', maxCount: 1 }
   ])(req, res, (err) => {
     if (err) {
-      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-        return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
-      }
       req.session.error = 'Upload error: ' + err.message;
       return res.redirect('/admin/products/edit/' + req.params.id);
     }
@@ -166,49 +122,22 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   if (!product) return res.redirect('/admin/products');
 
   const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free } = req.body;
-  
-  let coverImage = product.cover_image;
-  let filePath = product.file_path;
-  let fileName = product.file_name;
-  let fileSize = product.file_size;
 
+  let coverImage = product.cover_image;
   if (req.files?.cover_image?.[0]) {
     coverImage = '/uploads/images/' + req.files.cover_image[0].filename;
-  }
-  if (req.files?.pdf_files?.[0]) {
-    filePath = '/uploads/guides/' + req.files.pdf_files[0].filename;
-    fileName = req.files.pdf_files[0].originalname;
-    fileSize = req.files.pdf_files[0].size;
   }
 
   db.prepare(`
     UPDATE products SET title=?, description=?, short_description=?, category_id=?, price=?, original_price=?,
-    subject=?, level=?, curriculum=?, pages=?, cover_image=?, file_path=?, file_name=?,
-    file_size=?, is_featured=?, is_active=?, is_free=?, tags=?, updated_at=CURRENT_TIMESTAMP
+    subject=?, level=?, curriculum=?, pages=?, cover_image=?,
+    is_featured=?, is_active=?, is_free=?, tags=?, updated_at=CURRENT_TIMESTAMP
     WHERE id=?
-  `).run(title, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags, product.id);
-
-  // Append new PDF files (don't delete existing)
-  if (req.files?.pdf_files) {
-    const existing = db.prepare('SELECT COUNT(*) as c FROM product_files WHERE product_id = ?').get(product.id).c;
-    req.files.pdf_files.forEach((f, i) => {
-      db.prepare('INSERT INTO product_files (product_id, file_path, file_name, file_size, sort_order) VALUES (?,?,?,?,?)')
-        .run(product.id, '/uploads/guides/' + f.filename, f.originalname, f.size, existing + i);
-    });
-  }
-  // Append new preview images
-  if (req.files?.preview_images) {
-    const existing = db.prepare('SELECT COUNT(*) as c FROM product_previews WHERE product_id = ?').get(product.id).c;
-    req.files.preview_images.forEach((f, i) => {
-      db.prepare('INSERT INTO product_previews (product_id, image_path, sort_order) VALUES (?,?,?)')
-        .run(product.id, '/uploads/images/' + f.filename, existing + i);
-    });
-  }
+  `).run(title, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null,
+    subject, level, curriculum, parseInt(pages) || 0, coverImage,
+    is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags, product.id);
 
   req.session.success = 'Product updated successfully!';
-  if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-    return res.json({ success: true, redirect: '/admin/products/edit/' + product.id, message: 'Product updated successfully!' });
-  }
   res.redirect('/admin/products/edit/' + product.id);
 });
 

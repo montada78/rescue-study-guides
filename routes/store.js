@@ -4,26 +4,27 @@ const db = require('../database/db');
 
 // HOME PAGE
 router.get('/', (req, res) => {
-  const featuredProducts = db.prepare(`
+  const featuredProducts = dbCached('featured', 60000, () => db.prepare(`
     SELECT p.*, c.name as category_name, c.color as category_color
     FROM products p LEFT JOIN categories c ON p.category_id = c.id
     WHERE p.is_featured = 1 AND p.is_active = 1
     ORDER BY p.created_at DESC LIMIT 6
-  `).all();
+  `).all());
 
-  const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
-  
-  const stats = {
+  const categories = dbCached('categories', 300000, () =>
+    db.prepare('SELECT * FROM categories ORDER BY name').all());
+
+  const stats = dbCached('stats', 120000, () => ({
     students: db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'student'").get().count,
     guides: db.prepare('SELECT COUNT(*) as count FROM products WHERE is_active = 1').get().count,
     downloads: db.prepare('SELECT COALESCE(SUM(downloads_count), 0) as total FROM products').get().total,
-  };
+  }));
 
-  const freeGuides = db.prepare(`
+  const freeGuides = dbCached('freeGuides', 120000, () => db.prepare(`
     SELECT p.*, c.name as category_name
     FROM products p LEFT JOIN categories c ON p.category_id = c.id
     WHERE p.is_free = 1 AND p.is_active = 1 LIMIT 3
-  `).all();
+  `).all());
 
   res.render('index', { title: 'Rescue Study Guides - Rescue Your Exam Results!', featuredProducts, categories, stats, freeGuides });
 });
@@ -124,7 +125,37 @@ router.get('/product/:slug', (req, res) => {
     ? db.prepare('SELECT id FROM downloads WHERE user_id = ? AND product_id = ?').get(req.session.user.id, product.id)
     : null;
 
-  res.render('product', { title: `${product.title} - Exam Rescue Guides`, product, reviews, related, inCart, inWishlist, owned, productFiles, productPreviews });
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "description": product.description || product.short_description,
+    "image": product.cover_image ? 'https://examrescueguides.com' + product.cover_image : '',
+    "brand": { "@type": "Brand", "name": "Exam Rescue Guides" },
+    "offers": {
+      "@type": "Offer",
+      "price": product.price,
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "https://examrescueguides.com/product/" + product.slug
+    },
+    "aggregateRating": reviews.length > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1),
+      "reviewCount": reviews.length
+    } : undefined
+  });
+
+  res.render('product', {
+    title: `${product.title} - Exam Rescue Guides`,
+    metaDesc: product.short_description || product.description || 'High-quality revision guide for ' + product.subject,
+    metaKeywords: (product.tags || '') + ',' + product.subject + ',' + product.level + ',' + product.curriculum,
+    ogImage: product.cover_image ? 'https://examrescueguides.com' + product.cover_image : '',
+    ogType: 'product',
+    canonicalPath: '/product/' + product.slug,
+    jsonLd,
+    product, reviews, related, inCart, inWishlist, owned, productFiles, productPreviews
+  });
 });
 
 // SUBMIT REVIEW (with simple math captcha)
@@ -164,6 +195,39 @@ router.post('/product/:slug/review', (req, res) => {
 
   req.session.success = '⭐ Thank you for your review!';
   res.redirect('/product/' + req.params.slug);
+});
+
+// ROBOTS.TXT
+router.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /account/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /auth/
+Sitemap: https://examrescueguides.com/sitemap.xml`);
+});
+
+// SITEMAP.XML
+router.get('/sitemap.xml', (req, res) => {
+  const products = db.prepare("SELECT slug, updated_at FROM products WHERE is_active = 1").all();
+  const base = 'https://examrescueguides.com';
+  const today = new Date().toISOString().split('T')[0];
+
+  const urls = [
+    `<url><loc>${base}/</loc><changefreq>daily</changefreq><priority>1.0</priority><lastmod>${today}</lastmod></url>`,
+    `<url><loc>${base}/shop</loc><changefreq>daily</changefreq><priority>0.9</priority><lastmod>${today}</lastmod></url>`,
+    `<url><loc>${base}/free</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>${today}</lastmod></url>`,
+    `<url><loc>${base}/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
+    `<url><loc>${base}/contact</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
+    `<url><loc>${base}/how-it-works</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
+    ...products.map(p => `<url><loc>${base}/product/${p.slug}</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>${(p.updated_at||today).split('T')[0]}</lastmod></url>`)
+  ];
+
+  res.header('Content-Type', 'application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`);
 });
 
 // ABOUT PAGE

@@ -12,6 +12,17 @@ const fs = require('fs');
 // Initialize DB
 const db = require('./database/db');
 
+// ── Simple in-memory cache for heavy repeated queries ──────────────────────
+const _cache = new Map();
+function cached(key, ttlMs, fn) {
+  const hit = _cache.get(key);
+  if (hit && Date.now() < hit.expires) return hit.data;
+  const data = fn();
+  _cache.set(key, { data, expires: Date.now() + ttlMs });
+  return data;
+}
+global.dbCached = cached; // make available in routes
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,8 +37,8 @@ app.set('layout', 'layout');
 app.set('layout extractScripts', true);
 app.set('layout extractStyles', true);
 
-// Security & Performance
-app.use(compression());
+// Security & Performance — aggressive compression
+app.use(compression({ level: 6, threshold: 1024 }));
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -41,6 +52,16 @@ app.use(helmet({
   },
 }));
 
+// Cache HTML responses for anonymous users (30 seconds)
+app.use((req, res, next) => {
+  if (!req.session?.user && req.method === 'GET' && !req.path.startsWith('/admin') && !req.path.startsWith('/account')) {
+    res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
+  } else {
+    res.setHeader('Cache-Control', 'no-store');
+  }
+  next();
+});
+
 // Logging
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
@@ -50,10 +71,26 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files
+// Static files — aggressive caching for assets, no cache for HTML
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads'), {
+  maxAge: '30d', immutable: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.pdf')) res.setHeader('Content-Disposition', 'inline');
+  }
+}));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css'), { maxAge: '7d' }));
+app.use('/js',  express.static(path.join(__dirname, 'public', 'js'),  { maxAge: '7d' }));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images'), { maxAge: '30d' }));
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
 }));
+
+// ETag + cache control for HTML pages
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  next();
+});
 
 // Session setup
 const sessionStore = new SQLiteStore({
@@ -133,7 +170,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`
 🚀 ============================================
    Rescue Study Guides - Server Running!
@@ -143,5 +180,10 @@ app.listen(PORT, '0.0.0.0', () => {
 ============================================
   `);
 });
+
+// 10 minute timeout for large file uploads
+server.timeout = 600000;
+server.keepAliveTimeout = 620000;
+server.headersTimeout = 620000;
 
 module.exports = app;
