@@ -167,14 +167,19 @@
                   <% } %>
                 <% } %>
               </div>
-              <% if (isLoggedIn) { %>
-              <button data-add-cart="<%= product.id %>" class="bg-rescue-red text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rescue-red-dark transition-all">
-                <i class="fas fa-<%= product.is_free ? 'download' : 'cart-plus' %> mr-1"></i>
-                <%= product.is_free || product.price === 0 ? 'Get Free' : 'Add' %>
-              </button>
-              <% } else { %>
-              <a href="/auth/login" class="bg-rescue-red text-white px-3 py-1.5 rounded-lg text-xs font-bold">Get Now</a>
-              <% } %>
+              <div class="flex items-center gap-1.5">
+                <a href="/product/<%= product.slug %>" class="bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all" title="View details">
+                  <i class="fas fa-eye mr-1"></i>View
+                </a>
+                <% if (isLoggedIn) { %>
+                <button data-add-cart="<%= product.id %>" class="bg-rescue-red text-white px-2.5 py-1.5 rounded-lg text-xs font-bold hover:bg-rescue-red-dark transition-all">
+                  <i class="fas fa-<%= product.is_free ? 'download' : 'cart-plus' %> mr-1"></i>
+                  <%= product.is_free || product.price === 0 ? 'Free' : 'Add' %>
+                </button>
+                <% } else { %>
+                <a href="/auth/login" class="bg-rescue-red text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">Get</a>
+                <% } %>
+              </div>
             </div>
           </div>
         </div>

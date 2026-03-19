@@ -38,13 +38,30 @@
           </div>
 
           <% if (dl.download_count < dl.max_downloads) { %>
+          <!-- Primary download (legacy single file) -->
+          <% if (dl.file_path) { %>
           <a href="/downloads/file/<%= dl.download_token %>" 
-             class="block w-full text-center bg-rescue-red text-white py-2.5 rounded-xl font-bold text-sm hover:bg-rescue-red-dark transition-all">
-            <i class="fas fa-download mr-1.5"></i>Download PDF
+             class="block w-full text-center bg-rescue-red text-white py-2.5 rounded-xl font-bold text-sm hover:bg-rescue-red-dark transition-all mb-2">
+            <i class="fas fa-download mr-1.5"></i><%= dl.file_name || 'Download PDF' %>
           </a>
+          <% } %>
+          <!-- Extra files (multi-file products) -->
+          <% if (dl.extraFiles && dl.extraFiles.length > 0) { %>
+            <% dl.extraFiles.forEach(function(ef, idx) { %>
+            <a href="/downloads/file-extra/<%= dl.download_token %>/<%= ef.id %>"
+               class="block w-full text-center bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all mb-1.5">
+              <i class="fas fa-file-pdf mr-1.5"></i>Part <%= idx+1 %>: <%= ef.file_name %>
+            </a>
+            <% }) %>
+          <% } %>
+          <% if (!dl.file_path && (!dl.extraFiles || dl.extraFiles.length === 0)) { %>
+          <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 text-center py-2.5 rounded-xl text-sm font-medium">
+            File being processed — check back soon
+          </div>
+          <% } %>
           <% } else { %>
           <div class="bg-gray-100 text-gray-500 text-center py-2.5 rounded-xl text-sm font-medium">
-            Limit Reached — Contact Support
+            Limit Reached — <a href="mailto:support@examrescueguides.com" class="text-rescue-red underline">Contact Support</a>
           </div>
           <% } %>
         </div>

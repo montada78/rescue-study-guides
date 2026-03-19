@@ -72,4 +72,43 @@ router.get('/file/:token', requireAuth, (req, res) => {
   });
 });
 
+// DOWNLOAD EXTRA FILE (multi-file products)
+router.get('/file-extra/:token/:fileId', requireAuth, (req, res) => {
+  // Verify user owns the product via their download token
+  const download = db.prepare(`
+    SELECT d.*, p.title FROM downloads d JOIN products p ON d.product_id = p.id
+    WHERE d.download_token = ? AND d.user_id = ?
+  `).get(req.params.token, req.session.user.id);
+
+  if (!download) {
+    req.session.error = 'Download not authorized.';
+    return res.redirect('/account/downloads');
+  }
+
+  if (download.max_downloads > 0 && download.download_count >= download.max_downloads) {
+    req.session.error = 'Download limit reached. Please contact support.';
+    return res.redirect('/account/downloads');
+  }
+
+  const file = db.prepare('SELECT * FROM product_files WHERE id = ? AND product_id = ?')
+    .get(req.params.fileId, download.product_id);
+
+  if (!file) {
+    req.session.error = 'File not found.';
+    return res.redirect('/account/downloads');
+  }
+
+  const filePath = path.join(__dirname, '..', 'public', file.file_path);
+  if (!fs.existsSync(filePath)) {
+    req.session.error = 'File temporarily unavailable. Please contact support.';
+    return res.redirect('/account/downloads');
+  }
+
+  // Increment download count (shared across all files of this product)
+  db.prepare('UPDATE downloads SET download_count = download_count + 1, last_downloaded = CURRENT_TIMESTAMP WHERE id = ?').run(download.id);
+  db.prepare('UPDATE products SET downloads_count = downloads_count + 1 WHERE id = ?').run(download.product_id);
+
+  res.download(filePath, file.file_name || path.basename(filePath));
+});
+
 module.exports = router;

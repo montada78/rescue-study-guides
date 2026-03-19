@@ -68,15 +68,15 @@ router.get('/products', requireAdmin, (req, res) => {
 // ADD PRODUCT PAGE
 router.get('/products/new', requireAdmin, (req, res) => {
   const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
-  res.render('admin/product-form', { title: 'Add New Product', product: null, categories });
+  res.render('admin/product-form', { title: 'Add New Product', product: null, categories, productFiles: [], productPreviews: [] });
 });
 
 // ADD PRODUCT POST
 router.post('/products/new', requireAdmin, (req, res, next) => {
   upload.fields([
     { name: 'cover_image', maxCount: 1 },
-    { name: 'preview_image', maxCount: 1 },
-    { name: 'pdf_file', maxCount: 1 }
+    { name: 'preview_images', maxCount: 10 },
+    { name: 'pdf_files', maxCount: 10 }
   ])(req, res, (err) => {
     if (err) {
       if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
@@ -92,27 +92,43 @@ router.post('/products/new', requireAdmin, (req, res, next) => {
   
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
   
-  let coverImage = null, previewImage = null, filePath = null, fileName = null, fileSize = 0;
+  let coverImage = null;
+  // Keep legacy single-file fields for backward compat
+  let filePath = null, fileName = null, fileSize = 0;
   
   if (req.files?.cover_image?.[0]) {
     coverImage = '/uploads/images/' + req.files.cover_image[0].filename;
   }
-  if (req.files?.preview_image?.[0]) {
-    previewImage = '/uploads/images/' + req.files.preview_image[0].filename;
-  }
-  if (req.files?.pdf_file?.[0]) {
-    filePath = '/uploads/guides/' + req.files.pdf_file[0].filename;
-    fileName = req.files.pdf_file[0].originalname;
-    fileSize = req.files.pdf_file[0].size;
+  // Primary pdf (first one) for legacy field
+  if (req.files?.pdf_files?.[0]) {
+    filePath = '/uploads/guides/' + req.files.pdf_files[0].filename;
+    fileName = req.files.pdf_files[0].originalname;
+    fileSize = req.files.pdf_files[0].size;
   }
 
-  db.prepare(`
-    INSERT INTO products (title, slug, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, cover_image, preview_image, file_path, file_name, file_size, is_featured, is_active, is_free, tags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, previewImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags);
+  const result = db.prepare(`
+    INSERT INTO products (title, slug, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, cover_image, file_path, file_name, file_size, is_featured, is_active, is_free, tags)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags);
+
+  const productId = result.lastInsertRowid;
+
+  // Save all PDF files to product_files table
+  if (req.files?.pdf_files) {
+    req.files.pdf_files.forEach((f, i) => {
+      db.prepare('INSERT INTO product_files (product_id, file_path, file_name, file_size, sort_order) VALUES (?,?,?,?,?)')
+        .run(productId, '/uploads/guides/' + f.filename, f.originalname, f.size, i);
+    });
+  }
+  // Save all preview images to product_previews table
+  if (req.files?.preview_images) {
+    req.files.preview_images.forEach((f, i) => {
+      db.prepare('INSERT INTO product_previews (product_id, image_path, sort_order) VALUES (?,?,?)')
+        .run(productId, '/uploads/images/' + f.filename, i);
+    });
+  }
 
   req.session.success = 'Product added successfully!';
-  // Return JSON for XHR/fetch requests, redirect for normal form submits
   if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
     return res.json({ success: true, redirect: '/admin/products', message: 'Product saved successfully!' });
   }
@@ -124,15 +140,17 @@ router.get('/products/edit/:id', requireAdmin, (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.redirect('/admin/products');
   const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
-  res.render('admin/product-form', { title: 'Edit Product', product, categories });
+  const productFiles = db.prepare('SELECT * FROM product_files WHERE product_id = ? ORDER BY sort_order').all(product.id);
+  const productPreviews = db.prepare('SELECT * FROM product_previews WHERE product_id = ? ORDER BY sort_order').all(product.id);
+  res.render('admin/product-form', { title: 'Edit Product', product, categories, productFiles, productPreviews });
 });
 
 // EDIT PRODUCT POST
 router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   upload.fields([
     { name: 'cover_image', maxCount: 1 },
-    { name: 'preview_image', maxCount: 1 },
-    { name: 'pdf_file', maxCount: 1 }
+    { name: 'preview_images', maxCount: 10 },
+    { name: 'pdf_files', maxCount: 10 }
   ])(req, res, (err) => {
     if (err) {
       if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
@@ -150,7 +168,6 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free } = req.body;
   
   let coverImage = product.cover_image;
-  let previewImage = product.preview_image;
   let filePath = product.file_path;
   let fileName = product.file_name;
   let fileSize = product.file_size;
@@ -158,27 +175,41 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   if (req.files?.cover_image?.[0]) {
     coverImage = '/uploads/images/' + req.files.cover_image[0].filename;
   }
-  if (req.files?.preview_image?.[0]) {
-    previewImage = '/uploads/images/' + req.files.preview_image[0].filename;
-  }
-  if (req.files?.pdf_file?.[0]) {
-    filePath = '/uploads/guides/' + req.files.pdf_file[0].filename;
-    fileName = req.files.pdf_file[0].originalname;
-    fileSize = req.files.pdf_file[0].size;
+  if (req.files?.pdf_files?.[0]) {
+    filePath = '/uploads/guides/' + req.files.pdf_files[0].filename;
+    fileName = req.files.pdf_files[0].originalname;
+    fileSize = req.files.pdf_files[0].size;
   }
 
   db.prepare(`
     UPDATE products SET title=?, description=?, short_description=?, category_id=?, price=?, original_price=?,
-    subject=?, level=?, curriculum=?, pages=?, cover_image=?, preview_image=?, file_path=?, file_name=?,
+    subject=?, level=?, curriculum=?, pages=?, cover_image=?, file_path=?, file_name=?,
     file_size=?, is_featured=?, is_active=?, is_free=?, tags=?, updated_at=CURRENT_TIMESTAMP
     WHERE id=?
-  `).run(title, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, previewImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags, product.id);
+  `).run(title, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, filePath, fileName, fileSize, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags, product.id);
+
+  // Append new PDF files (don't delete existing)
+  if (req.files?.pdf_files) {
+    const existing = db.prepare('SELECT COUNT(*) as c FROM product_files WHERE product_id = ?').get(product.id).c;
+    req.files.pdf_files.forEach((f, i) => {
+      db.prepare('INSERT INTO product_files (product_id, file_path, file_name, file_size, sort_order) VALUES (?,?,?,?,?)')
+        .run(product.id, '/uploads/guides/' + f.filename, f.originalname, f.size, existing + i);
+    });
+  }
+  // Append new preview images
+  if (req.files?.preview_images) {
+    const existing = db.prepare('SELECT COUNT(*) as c FROM product_previews WHERE product_id = ?').get(product.id).c;
+    req.files.preview_images.forEach((f, i) => {
+      db.prepare('INSERT INTO product_previews (product_id, image_path, sort_order) VALUES (?,?,?)')
+        .run(product.id, '/uploads/images/' + f.filename, existing + i);
+    });
+  }
 
   req.session.success = 'Product updated successfully!';
   if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-    return res.json({ success: true, redirect: '/admin/products', message: 'Product updated successfully!' });
+    return res.json({ success: true, redirect: '/admin/products/edit/' + product.id, message: 'Product updated successfully!' });
   }
-  res.redirect('/admin/products');
+  res.redirect('/admin/products/edit/' + product.id);
 });
 
 // TOGGLE PRODUCT STATUS
@@ -186,6 +217,44 @@ router.post('/products/toggle/:id', requireAdmin, (req, res) => {
   const product = db.prepare('SELECT is_active FROM products WHERE id = ?').get(req.params.id);
   db.prepare('UPDATE products SET is_active = ? WHERE id = ?').run(product.is_active ? 0 : 1, req.params.id);
   res.json({ success: true, active: !product.is_active });
+});
+
+// DELETE INDIVIDUAL PRODUCT FILE
+router.post('/products/files/delete/:fileId', requireAdmin, (req, res) => {
+  const file = db.prepare('SELECT * FROM product_files WHERE id = ?').get(req.params.fileId);
+  if (!file) return res.json({ success: false, message: 'File not found' });
+  db.prepare('DELETE FROM product_files WHERE id = ?').run(file.id);
+  res.json({ success: true });
+});
+
+// DELETE INDIVIDUAL PREVIEW IMAGE
+router.post('/products/previews/delete/:previewId', requireAdmin, (req, res) => {
+  const prev = db.prepare('SELECT * FROM product_previews WHERE id = ?').get(req.params.previewId);
+  if (!prev) return res.json({ success: false });
+  db.prepare('DELETE FROM product_previews WHERE id = ?').run(prev.id);
+  res.json({ success: true });
+});
+
+// ADMIN DOWNLOAD FILE (any uploaded file)
+router.get('/products/download/:fileId', requireAdmin, (req, res) => {
+  const file = db.prepare('SELECT * FROM product_files WHERE id = ?').get(req.params.fileId);
+  if (!file) {
+    // Try legacy single file from product
+    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.fileId);
+    if (!product || !product.file_path) return res.status(404).send('File not found');
+    const fullPath = require('path').join(__dirname, '..', 'public', product.file_path);
+    return res.download(fullPath, product.file_name || 'guide.pdf');
+  }
+  const fullPath = require('path').join(__dirname, '..', 'public', file.file_path);
+  res.download(fullPath, file.file_name || 'guide.pdf');
+});
+
+// ADMIN DOWNLOAD LEGACY (by product id)
+router.get('/products/download-legacy/:productId', requireAdmin, (req, res) => {
+  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.productId);
+  if (!product || !product.file_path) return res.status(404).send('No file attached to this product');
+  const fullPath = require('path').join(__dirname, '..', 'public', product.file_path);
+  res.download(fullPath, product.file_name || 'guide.pdf');
 });
 
 // DELETE PRODUCT

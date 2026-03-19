@@ -101,44 +101,108 @@
 
             <!-- File Upload -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 class="font-bold text-gray-700 mb-4">📎 File Upload</h3>
+              <h3 class="font-bold text-gray-700 mb-4">📎 PDF Files Upload</h3>
               
-              <div class="space-y-4">
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                    PDF Study Guide File
-                    <% if (product?.file_name) { %><span class="text-green-600 font-normal ml-2">✅ Current: <%= product.file_name %></span><% } %>
-                  </label>
-
-                  <!-- Drop zone -->
-                  <label for="pdf_file" id="pdfLabel" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-rescue-red transition-colors cursor-pointer block">
-                    <i class="fas fa-file-pdf text-3xl text-red-400 mb-2 block"></i>
-                    <p id="pdfLabelText" class="text-sm text-gray-600 font-medium">Click here to choose a PDF file</p>
-                    <p class="text-xs text-gray-400 mt-1">.pdf only · Max 200 MB</p>
-                  </label>
-                  <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" class="hidden">
-
-                  <!-- Upload Now button — appears after file chosen -->
-                  <button type="button" id="uploadNowBtn"
-                    style="display:none;width:100%;margin-top:0.75rem;background:#2563eb;color:#fff;padding:0.75rem;border-radius:0.75rem;font-weight:700;border:none;cursor:pointer;font-size:0.95rem;"
-                    >
-                    <i class="fas fa-cloud-upload-alt" style="margin-right:0.5rem"></i>
-                    <span id="uploadNowText">Upload PDF Now</span>
-                  </button>
-
-                  <!-- Progress Bar -->
-                  <div id="uploadProgressWrap" style="display:none;margin-top:0.75rem;">
-                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#6b7280;margin-bottom:4px;">
-                      <span id="uploadFileName" style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;"></span>
-                      <span id="uploadPercent" style="font-weight:700;color:#2563eb;">0%</span>
+              <!-- Existing files list (edit mode) -->
+              <% if (typeof productFiles !== 'undefined' && productFiles.length > 0) { %>
+              <div class="mb-4">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Uploaded Files</p>
+                <div class="space-y-2" id="existingFilesList">
+                  <% productFiles.forEach(function(f) { %>
+                  <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100" id="pfile-<%= f.id %>">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <i class="fas fa-file-pdf text-red-400 flex-shrink-0"></i>
+                      <span class="text-sm text-gray-700 font-medium truncate"><%= f.file_name %></span>
+                      <span class="text-xs text-gray-400 flex-shrink-0">(<%= (f.file_size/1024/1024).toFixed(1) %> MB)</span>
                     </div>
-                    <div style="width:100%;background:#e5e7eb;border-radius:9999px;height:16px;overflow:hidden;">
-                      <div id="uploadBar" style="width:0%;background:#2563eb;height:16px;border-radius:9999px;transition:width 0.3s;"></div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                      <a href="/admin/products/download/<%= f.id %>" 
+                         class="bg-blue-100 text-blue-600 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-blue-200 transition-colors">
+                        <i class="fas fa-download mr-1"></i>Download
+                      </a>
+                      <button type="button" onclick="deleteFile(<%= f.id %>, 'pfile-<%= f.id %>')"
+                        class="bg-red-100 text-red-500 px-2 py-1 rounded-lg text-xs hover:bg-red-200 transition-colors">
+                        <i class="fas fa-trash"></i>
+                      </button>
                     </div>
-                    <p id="uploadStatus" style="font-size:0.75rem;color:#6b7280;margin-top:4px;">Waiting…</p>
                   </div>
+                  <% }) %>
                 </div>
               </div>
+              <% } else if (product && product.file_name) { %>
+              <!-- Legacy single file -->
+              <div class="mb-4">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Current File</p>
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <i class="fas fa-file-pdf text-red-400 flex-shrink-0"></i>
+                    <span class="text-sm text-gray-700 font-medium truncate"><%= product.file_name %></span>
+                  </div>
+                  <a href="/admin/products/download-legacy/<%= product.id %>"
+                     class="bg-blue-100 text-blue-600 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-blue-200 transition-colors flex-shrink-0 ml-2">
+                    <i class="fas fa-download mr-1"></i>Download
+                  </a>
+                </div>
+              </div>
+              <% } %>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Add PDF File(s) <span class="text-gray-400 font-normal">(select multiple)</span>
+                </label>
+
+                <!-- Drop zone -->
+                <label for="pdf_file" id="pdfLabel" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-rescue-red transition-colors cursor-pointer block">
+                  <i class="fas fa-file-pdf text-3xl text-red-400 mb-2 block"></i>
+                  <p id="pdfLabelText" class="text-sm text-gray-600 font-medium">Click to choose PDF file(s)</p>
+                  <p class="text-xs text-gray-400 mt-1">.pdf only · Max 200 MB each · Multiple allowed</p>
+                </label>
+                <input type="file" name="pdf_files" id="pdf_file" accept=".pdf" multiple class="hidden">
+
+                <!-- Upload Now button -->
+                <button type="button" id="uploadNowBtn"
+                  style="display:none;width:100%;margin-top:0.75rem;background:#2563eb;color:#fff;padding:0.75rem;border-radius:0.75rem;font-weight:700;border:none;cursor:pointer;font-size:0.95rem;">
+                  <i class="fas fa-cloud-upload-alt" style="margin-right:0.5rem"></i>
+                  <span id="uploadNowText">Upload PDF Now</span>
+                </button>
+
+                <!-- Progress Bar -->
+                <div id="uploadProgressWrap" style="display:none;margin-top:0.75rem;">
+                  <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#6b7280;margin-bottom:4px;">
+                    <span id="uploadFileName" style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;"></span>
+                    <span id="uploadPercent" style="font-weight:700;color:#2563eb;">0%</span>
+                  </div>
+                  <div style="width:100%;background:#e5e7eb;border-radius:9999px;height:16px;overflow:hidden;">
+                    <div id="uploadBar" style="width:0%;background:#2563eb;height:16px;border-radius:9999px;transition:width 0.3s;"></div>
+                  </div>
+                  <p id="uploadStatus" style="font-size:0.75rem;color:#6b7280;margin-top:4px;">Waiting…</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview Images Upload -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold text-gray-700 mb-4">🖼️ Page Preview Images</h3>
+              <p class="text-xs text-gray-400 mb-3">Upload sample pages/screenshots so students can preview the guide before buying.</p>
+
+              <!-- Existing previews -->
+              <% if (typeof productPreviews !== 'undefined' && productPreviews.length > 0) { %>
+              <div class="grid grid-cols-3 gap-2 mb-4" id="existingPreviewsList">
+                <% productPreviews.forEach(function(p) { %>
+                <div class="relative group" id="prev-<%= p.id %>">
+                  <img src="<%= p.image_path %>" class="w-full h-24 object-cover rounded-xl border border-gray-200">
+                  <button type="button" onclick="deletePreview(<%= p.id %>, 'prev-<%= p.id %>')"
+                    class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <% }) %>
+              </div>
+              <% } %>
+
+              <input type="file" name="preview_images" accept="image/*" multiple
+                class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 cursor-pointer border border-dashed border-gray-300 rounded-xl p-3">
+              <p class="text-xs text-gray-400 mt-1">JPG/PNG · Multiple allowed · Max 5 MB each</p>
             </div>
           </div>
 
@@ -230,3 +294,21 @@
 
 </div>
 <script src="/js/product-form.js"></script>
+<script>
+function deleteFile(fileId, rowId) {
+  if (!confirm('Remove this file from the product?')) return;
+  fetch('/admin/products/files/delete/' + fileId, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(r => r.json()).then(d => {
+      if (d.success) { var el = document.getElementById(rowId); if (el) el.remove(); }
+      else alert('Could not delete file');
+    });
+}
+function deletePreview(prevId, rowId) {
+  if (!confirm('Remove this preview image?')) return;
+  fetch('/admin/products/previews/delete/' + prevId, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(r => r.json()).then(d => {
+      if (d.success) { var el = document.getElementById(rowId); if (el) el.remove(); }
+      else alert('Could not delete preview');
+    });
+}
+</script>

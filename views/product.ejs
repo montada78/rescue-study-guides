@@ -15,6 +15,34 @@
         <% } %>
       </div>
 
+      <!-- Preview Images Gallery -->
+      <% if (typeof productPreviews !== 'undefined' && productPreviews.length > 0) { %>
+      <div class="mb-5">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">📖 Preview Pages (<%= productPreviews.length %>)</p>
+        <div class="grid grid-cols-3 gap-2">
+          <% productPreviews.forEach(function(p, i) { %>
+          <img src="<%= p.image_path %>" alt="Preview page <%= i+1 %>"
+            class="w-full h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:scale-105 transition-transform shadow-sm"
+            onclick="openLightbox('<%= p.image_path %>', <%= i %>)">
+          <% }) %>
+        </div>
+      </div>
+      <!-- Lightbox -->
+      <div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;cursor:pointer;align-items:center;justify-content:center;">
+        <img id="lightboxImg" src="" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+        <button onclick="event.stopPropagation();moveLightbox(-1)" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);color:white;border:none;width:48px;height:48px;border-radius:50%;font-size:24px;cursor:pointer;">&#8249;</button>
+        <button onclick="event.stopPropagation();moveLightbox(1)"  style="position:absolute;right:20px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);color:white;border:none;width:48px;height:48px;border-radius:50%;font-size:24px;cursor:pointer;">&#8250;</button>
+        <button onclick="closeLightbox()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);color:white;border:none;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;">&#10005;</button>
+      </div>
+      <script>
+      var _previews = <%- JSON.stringify(productPreviews.map(function(p){return p.image_path;})) %>;
+      var _lbIdx = 0;
+      function openLightbox(src, idx) { _lbIdx=idx; document.getElementById('lightboxImg').src=src; document.getElementById('lightbox').style.display='flex'; }
+      function closeLightbox() { document.getElementById('lightbox').style.display='none'; }
+      function moveLightbox(dir) { _lbIdx=(_lbIdx+dir+_previews.length)%_previews.length; document.getElementById('lightboxImg').src=_previews[_lbIdx]; }
+      </script>
+      <% } %>
+
       <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sticky top-24">
         <div class="text-center mb-5">
           <% if (product.is_free || product.price === 0) { %>

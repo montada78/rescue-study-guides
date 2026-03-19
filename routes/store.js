@@ -109,6 +109,9 @@ router.get('/product/:slug', (req, res) => {
     WHERE p.category_id = ? AND p.id != ? AND p.is_active = 1 LIMIT 4
   `).all(product.category_id, product.id);
 
+  const productFiles    = db.prepare('SELECT * FROM product_files WHERE product_id = ? ORDER BY sort_order').all(product.id);
+  const productPreviews = db.prepare('SELECT * FROM product_previews WHERE product_id = ? ORDER BY sort_order').all(product.id);
+
   const inCart = req.session.user
     ? db.prepare('SELECT id FROM cart WHERE user_id = ? AND product_id = ?').get(req.session.user.id, product.id)
     : null;
@@ -121,7 +124,7 @@ router.get('/product/:slug', (req, res) => {
     ? db.prepare('SELECT id FROM downloads WHERE user_id = ? AND product_id = ?').get(req.session.user.id, product.id)
     : null;
 
-  res.render('product', { title: `${product.title} - Rescue Study Guides`, product, reviews, related, inCart, inWishlist, owned });
+  res.render('product', { title: `${product.title} - Exam Rescue Guides`, product, reviews, related, inCart, inWishlist, owned, productFiles, productPreviews });
 });
 
 // ABOUT PAGE

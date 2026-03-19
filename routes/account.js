@@ -43,13 +43,20 @@ router.get('/', requireAuth, (req, res) => {
 router.get('/downloads', requireAuth, (req, res) => {
   const downloads = db.prepare(`
     SELECT d.*, p.title, p.cover_image, p.subject, p.level, p.curriculum, p.pages,
+           p.file_path, p.file_name,
            c.name as category_name, c.color as category_color
     FROM downloads d JOIN products p ON d.product_id = p.id
     LEFT JOIN categories c ON p.category_id = c.id
     WHERE d.user_id = ? ORDER BY d.created_at DESC
   `).all(req.session.user.id);
 
-  res.render('account/downloads', { title: 'My Downloads - Rescue Study Guides', downloads });
+  // Attach extra files per download
+  const downloadsWithFiles = downloads.map(function(d) {
+    const extraFiles = db.prepare('SELECT * FROM product_files WHERE product_id = ? ORDER BY sort_order').all(d.product_id);
+    return Object.assign({}, d, { extraFiles });
+  });
+
+  res.render('account/downloads', { title: 'My Downloads - Exam Rescue Guides', downloads: downloadsWithFiles });
 });
 
 // MY ORDERS
