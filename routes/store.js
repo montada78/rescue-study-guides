@@ -1,6 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
+const nodemailer = require('nodemailer');
+
+// Email transporter (Gmail)
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.CONTACT_EMAIL || 'kanayatichemistry@gmail.com',
+    pass: process.env.CONTACT_EMAIL_PASS || ''
+  }
+});
 
 // HOME PAGE
 router.get('/', (req, res) => {
@@ -237,7 +247,35 @@ router.get('/about', (req, res) => {
 
 // CONTACT PAGE
 router.get('/contact', (req, res) => {
-  res.render('contact', { title: 'Contact - Rescue Study Guides' });
+  res.render('contact', { title: 'Contact - Rescue Study Guides', success: null, error: null });
+});
+
+// CONTACT FORM SUBMIT
+router.post('/contact', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+  if (!name || !email || !message) {
+    return res.render('contact', { title: 'Contact - Rescue Study Guides', success: null, error: 'Please fill in all required fields.' });
+  }
+  try {
+    await transporter.sendMail({
+      from: `"${name}" <${process.env.CONTACT_EMAIL || 'kanayatichemistry@gmail.com'}>`,
+      to: 'kanayatichemistry@gmail.com',
+      replyTo: email,
+      subject: `[Exam Rescue Guides] ${subject || 'Contact Form'} - from ${name}`,
+      html: `
+        <h2>New Contact Form Message</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject || 'General Question'}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `
+    });
+    res.render('contact', { title: 'Contact - Rescue Study Guides', success: 'Message sent! We\'ll get back to you within 24 hours.', error: null });
+  } catch (err) {
+    console.error('Contact email error:', err);
+    res.render('contact', { title: 'Contact - Rescue Study Guides', success: null, error: 'Failed to send message. Please email us directly at kanayatichemistry@gmail.com' });
+  }
 });
 
 // HOW IT WORKS
