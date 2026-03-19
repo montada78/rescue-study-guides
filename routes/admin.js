@@ -203,18 +203,38 @@ router.post('/products/toggle/:id', requireAdmin, (req, res) => {
 
 // DELETE INDIVIDUAL PRODUCT FILE
 router.post('/products/files/delete/:fileId', requireAdmin, (req, res) => {
-  const file = db.prepare('SELECT * FROM product_files WHERE id = ?').get(req.params.fileId);
-  if (!file) return res.json({ success: false, message: 'File not found' });
-  db.prepare('DELETE FROM product_files WHERE id = ?').run(file.id);
-  res.json({ success: true });
+  try {
+    const file = db.prepare('SELECT * FROM product_files WHERE id = ?').get(req.params.fileId);
+    if (!file) return res.json({ success: false, message: 'File not found' });
+    // Delete physical file
+    try {
+      const fullPath = require('path').join(__dirname, '..', 'public', file.file_path);
+      if (require('fs').existsSync(fullPath)) require('fs').unlinkSync(fullPath);
+    } catch(e) { console.error('File delete error:', e.message); }
+    db.prepare('DELETE FROM product_files WHERE id = ?').run(file.id);
+    res.json({ success: true });
+  } catch(e) {
+    console.error('Delete file error:', e);
+    res.json({ success: false, message: e.message });
+  }
 });
 
 // DELETE INDIVIDUAL PREVIEW IMAGE
 router.post('/products/previews/delete/:previewId', requireAdmin, (req, res) => {
-  const prev = db.prepare('SELECT * FROM product_previews WHERE id = ?').get(req.params.previewId);
-  if (!prev) return res.json({ success: false });
-  db.prepare('DELETE FROM product_previews WHERE id = ?').run(prev.id);
-  res.json({ success: true });
+  try {
+    const prev = db.prepare('SELECT * FROM product_previews WHERE id = ?').get(req.params.previewId);
+    if (!prev) return res.json({ success: false, message: 'Preview not found' });
+    // Delete physical file
+    try {
+      const fullPath = require('path').join(__dirname, '..', 'public', prev.image_path);
+      if (require('fs').existsSync(fullPath)) require('fs').unlinkSync(fullPath);
+    } catch(e) { console.error('Preview delete error:', e.message); }
+    db.prepare('DELETE FROM product_previews WHERE id = ?').run(prev.id);
+    res.json({ success: true });
+  } catch(e) {
+    console.error('Delete preview error:', e);
+    res.json({ success: false, message: e.message });
+  }
 });
 
 // ADMIN DOWNLOAD FILE (any uploaded file)
@@ -241,9 +261,34 @@ router.get('/products/download-legacy/:productId', requireAdmin, (req, res) => {
 
 // DELETE PRODUCT
 router.post('/products/delete/:id', requireAdmin, (req, res) => {
-  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
-  req.session.success = 'Product deleted';
-  res.redirect('/admin/products');
+  try {
+    const id = req.params.id;
+    // Delete associated files physically
+    const files = db.prepare('SELECT * FROM product_files WHERE product_id = ?').all(id);
+    files.forEach(f => {
+      try {
+        const fp = require('path').join(__dirname, '..', 'public', f.file_path);
+        if (require('fs').existsSync(fp)) require('fs').unlinkSync(fp);
+      } catch(e) {}
+    });
+    const previews = db.prepare('SELECT * FROM product_previews WHERE product_id = ?').all(id);
+    previews.forEach(p => {
+      try {
+        const fp = require('path').join(__dirname, '..', 'public', p.image_path);
+        if (require('fs').existsSync(fp)) require('fs').unlinkSync(fp);
+      } catch(e) {}
+    });
+    // Delete from DB
+    db.prepare('DELETE FROM product_files WHERE product_id = ?').run(id);
+    db.prepare('DELETE FROM product_previews WHERE product_id = ?').run(id);
+    db.prepare('DELETE FROM products WHERE id = ?').run(id);
+    req.session.success = 'Product deleted';
+    res.redirect('/admin/products');
+  } catch(e) {
+    console.error('Delete product error:', e);
+    req.session.error = 'Failed to delete product: ' + e.message;
+    res.redirect('/admin/products');
+  }
 });
 
 // USERS LIST
