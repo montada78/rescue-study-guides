@@ -63,6 +63,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </noscript>
   <% if (settings.CUSTOM_HEAD_CODE) { %><%- settings.CUSTOM_HEAD_CODE %><% } %>
+  <% if (settings.SITE_PRIMARY_COLOR && settings.SITE_PRIMARY_COLOR !== '#E63946') { %>
+  <style>
+    /* Dynamic primary color override from Admin Settings */
+    :root { --rescue-red: <%= settings.SITE_PRIMARY_COLOR %>; }
+    .bg-rescue-red, .btn-rescue { background-color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .text-rescue-red { color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .border-rescue-red { border-color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .from-rescue-red { --tw-gradient-from: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .hover\:bg-rescue-red:hover { background-color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .hover\:text-rescue-red:hover { color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .hover\:border-rescue-red:hover { border-color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .focus\:ring-rescue-red:focus { --tw-ring-color: <%= settings.SITE_PRIMARY_COLOR %> !important; }
+    .neon-glow { box-shadow: 0 0 20px <%= settings.SITE_PRIMARY_COLOR %>40 !important; }
+  </style>
+  <% } %>
 </head>
 <body class="bg-white font-sans">
   <!-- Top Promo Banner -->
