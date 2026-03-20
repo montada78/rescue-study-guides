@@ -609,6 +609,37 @@ router.post('/products/bundle-items/:id/remove', requireAdmin, (req, res) => {
 
 // ── COUPON MANAGEMENT ─────────────────────────────────────────────────────────
 
+// FILE RECOVERY TOOL
+router.get('/file-recovery', requireAdmin, (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const uploadsDir = path.join(__dirname, '..', 'public', 'uploads', 'guides');
+  const allFiles = fs.existsSync(uploadsDir) ? fs.readdirSync(uploadsDir).filter(f => f.endsWith('.pdf')) : [];
+  const linked = new Set(db.prepare('SELECT file_path FROM product_files').all().map(r => r.file_path.split('/').pop()));
+  const orphans = allFiles
+    .filter(f => !linked.has(f))
+    .map(f => {
+      const stat = fs.statSync(path.join(uploadsDir, f));
+      return { filename: f, size: stat.size, sizeMB: (stat.size / 1024 / 1024).toFixed(2), path: '/uploads/guides/' + f };
+    })
+    .filter(f => f.size > 1000) // skip empty/placeholder files
+    .sort((a, b) => b.size - a.size);
+  const products = db.prepare('SELECT id, title FROM products WHERE is_active = 1 ORDER BY title').all();
+  res.render('admin/file-recovery', { title: 'File Recovery', orphans, products });
+});
+
+router.post('/file-recovery/link', requireAdmin, (req, res) => {
+  const { product_id, file_path, file_name } = req.body;
+  const fs = require('fs');
+  const diskPath = require('path').join(__dirname, '..', 'public', file_path);
+  if (!fs.existsSync(diskPath)) { req.session.error = 'File not found on disk'; return res.redirect('/admin/file-recovery'); }
+  const stat = fs.statSync(diskPath);
+  db.prepare('INSERT INTO product_files (product_id, file_path, file_name, file_size) VALUES (?, ?, ?, ?)').run(parseInt(product_id), file_path, file_name, stat.size);
+  req.session.success = `✅ Linked "${file_name}" to product successfully`;
+  res.redirect('/admin/file-recovery');
+});
+
+
 // List coupons
 router.get('/coupons', requireAdmin, (req, res) => {
   const coupons = db.prepare('SELECT * FROM coupons ORDER BY created_at DESC').all();
