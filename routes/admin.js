@@ -368,122 +368,46 @@ router.post('/categories/add', requireAdmin, (req, res) => {
 
 // SETTINGS PAGE
 router.get('/settings', requireAdmin, (req, res) => {
-  const envPath = require('path').join(__dirname, '..', '.env');
-  const envContent = require('fs').existsSync(envPath) ? require('fs').readFileSync(envPath, 'utf8') : '';
-  const settings = {};
-  // Start with process.env values (covers Railway env vars)
-  const knownKeys = [
-    'STRIPE_PUBLISHABLE_KEY','STRIPE_SECRET_KEY','PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_MODE',
-    'APP_NAME','APP_URL','SITE_TAGLINE','PROMO_BANNER_ENABLED','PROMO_BANNER_TEXT','PROMO_BANNER_CODE',
-    'CONTACT_EMAIL','CONTACT_EMAIL_PASS','SUPPORT_WHATSAPP',
-    'INSTAGRAM_URL','TIKTOK_URL','FACEBOOK_URL','YOUTUBE_URL','TWITTER_URL','LINKEDIN_URL',
-    'CURRENCY','CURRENCY_SYMBOL','MAX_DOWNLOADS','DEFAULT_MAX_DOWNLOADS',
-    'GOOGLE_ANALYTICS_ID','ADMIN_EMAIL','ALLOW_REGISTRATION','MAINTENANCE_MODE',
-    'SITE_LOGO_URL','SITE_FAVICON_URL','SITE_PRIMARY_COLOR','FOOTER_TEXT','COPYRIGHT_TEXT',
-    'META_DESCRIPTION','META_KEYWORDS','FACEBOOK_PIXEL_ID','TAWK_PROPERTY_ID',
-    'HOMEPAGE_HERO_TITLE','HOMEPAGE_HERO_SUBTITLE','FEATURED_SECTION_TITLE',
-    'SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_PASS','SMTP_FROM',
-    'TAX_ENABLED','TAX_RATE','TAX_LABEL','MAX_CART_ITEMS','FREE_TRIAL_DAYS',
-    'PDF_WATERMARK','REQUIRE_EMAIL_VERIFICATION','ORDER_NOTIFICATION_EMAIL','LOW_STOCK_ALERT',
-    'CUSTOM_HEAD_CODE','CUSTOM_FOOTER_CODE',
-    'SHOW_REVIEWS','SHOW_WISHLIST','SHOW_HOW_IT_WORKS'
-  ];
-  knownKeys.forEach(k => { if (process.env[k] !== undefined) settings[k] = process.env[k]; });
-  // Then override with .env file (local dev)
-  envContent.split('\n').forEach(line => {
-    const [key, ...val] = line.split('=');
-    if (key && !key.startsWith('#')) settings[key.trim()] = val.join('=').trim();
-  });
+  const { getSettings } = require('../database/settings');
+  const settings = getSettings();
   res.render('admin/settings', { title: 'Settings', settings, saved: req.query.saved === '1' });
 });
 
 router.post('/settings', requireAdmin, (req, res) => {
-  const envPath = require('path').join(__dirname, '..', '.env');
-  const fs = require('fs');
-  let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
-  const updates = {
-    // Payment
-    STRIPE_PUBLISHABLE_KEY: req.body.STRIPE_PUBLISHABLE_KEY,
-    STRIPE_SECRET_KEY: req.body.STRIPE_SECRET_KEY,
-    PAYPAL_CLIENT_ID: req.body.PAYPAL_CLIENT_ID,
-    PAYPAL_CLIENT_SECRET: req.body.PAYPAL_CLIENT_SECRET,
-    PAYPAL_MODE: req.body.PAYPAL_MODE,
-    // Site
-    APP_URL: req.body.APP_URL,
-    APP_NAME: req.body.APP_NAME,
-    ADMIN_EMAIL: req.body.ADMIN_EMAIL,
-    // Email
-    CONTACT_EMAIL: req.body.CONTACT_EMAIL,
-    CONTACT_EMAIL_PASS: req.body.CONTACT_EMAIL_PASS,
-    // Customization
-    SITE_TAGLINE: req.body.SITE_TAGLINE,
-    PROMO_BANNER_TEXT: req.body.PROMO_BANNER_TEXT,
-    PROMO_BANNER_CODE: req.body.PROMO_BANNER_CODE,
-    PROMO_BANNER_ENABLED: req.body.PROMO_BANNER_ENABLED,
-    FREE_DOWNLOAD_LIMIT: req.body.FREE_DOWNLOAD_LIMIT,
-    MAX_DOWNLOAD_ATTEMPTS: req.body.MAX_DOWNLOAD_ATTEMPTS,
-    CURRENCY: req.body.CURRENCY,
-    CURRENCY_SYMBOL: req.body.CURRENCY_SYMBOL,
-    SUPPORT_WHATSAPP: req.body.SUPPORT_WHATSAPP,
-    INSTAGRAM_URL: req.body.INSTAGRAM_URL,
-    TIKTOK_URL: req.body.TIKTOK_URL,
-    YOUTUBE_URL: req.body.YOUTUBE_URL,
-    FACEBOOK_URL: req.body.FACEBOOK_URL,
-    GOOGLE_ANALYTICS_ID: req.body.GOOGLE_ANALYTICS_ID,
-    MAINTENANCE_MODE: req.body.MAINTENANCE_MODE,
-    ALLOW_REGISTRATION: req.body.ALLOW_REGISTRATION,
-    DEFAULT_DOWNLOAD_LIMIT: req.body.DEFAULT_DOWNLOAD_LIMIT,
-    // NEW settings
-    SITE_LOGO_URL: req.body.SITE_LOGO_URL,
-    SITE_FAVICON_URL: req.body.SITE_FAVICON_URL,
-    SITE_PRIMARY_COLOR: req.body.SITE_PRIMARY_COLOR,
-    META_DESCRIPTION: req.body.META_DESCRIPTION,
-    META_KEYWORDS: req.body.META_KEYWORDS,
-    TWITTER_URL: req.body.TWITTER_URL,
-    LINKEDIN_URL: req.body.LINKEDIN_URL,
-    FOOTER_TEXT: req.body.FOOTER_TEXT,
-    COPYRIGHT_TEXT: req.body.COPYRIGHT_TEXT,
-    SMTP_HOST: req.body.SMTP_HOST,
-    SMTP_PORT: req.body.SMTP_PORT,
-    SMTP_USER: req.body.SMTP_USER,
-    SMTP_PASS: req.body.SMTP_PASS,
-    SMTP_FROM_NAME: req.body.SMTP_FROM_NAME,
-    TAX_RATE: req.body.TAX_RATE,
-    TAX_LABEL: req.body.TAX_LABEL,
-    ENABLE_TAX: req.body.ENABLE_TAX,
-    FREE_TRIAL_DAYS: req.body.FREE_TRIAL_DAYS,
-    MAX_CART_ITEMS: req.body.MAX_CART_ITEMS,
-    WATERMARK_DOWNLOADS: req.body.WATERMARK_DOWNLOADS,
-    REQUIRE_EMAIL_VERIFY: req.body.REQUIRE_EMAIL_VERIFY,
-    HOMEPAGE_HERO_TITLE: req.body.HOMEPAGE_HERO_TITLE,
-    HOMEPAGE_HERO_SUBTITLE: req.body.HOMEPAGE_HERO_SUBTITLE,
-    HOMEPAGE_HERO_BG: req.body.HOMEPAGE_HERO_BG,
-    CHAT_WIDGET_CODE: req.body.CHAT_WIDGET_CODE,
-    FACEBOOK_PIXEL_ID: req.body.FACEBOOK_PIXEL_ID,
-    TAWK_PROPERTY_ID: req.body.TAWK_PROPERTY_ID,
-    CUSTOM_HEAD_CODE: req.body.CUSTOM_HEAD_CODE,
-    CUSTOM_FOOTER_CODE: req.body.CUSTOM_FOOTER_CODE,
-    FEATURED_SECTION_TITLE: req.body.FEATURED_SECTION_TITLE,
-    HOW_IT_WORKS_ENABLED: req.body.HOW_IT_WORKS_ENABLED,
-    REVIEWS_ENABLED: req.body.REVIEWS_ENABLED,
-    WISHLIST_ENABLED: req.body.WISHLIST_ENABLED,
-    LOW_STOCK_ALERT: req.body.LOW_STOCK_ALERT,
-    ORDER_NOTIFICATION_EMAIL: req.body.ORDER_NOTIFICATION_EMAIL,
-  };
-  if (req.body.ADMIN_PASSWORD) updates.ADMIN_PASSWORD = req.body.ADMIN_PASSWORD;
+  const { setSettings } = require('../database/settings');
+  // Collect all submitted fields
+  const updates = {};
+  const fields = [
+    'STRIPE_PUBLISHABLE_KEY','STRIPE_SECRET_KEY','PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_MODE',
+    'APP_NAME','APP_URL','SITE_TAGLINE','ADMIN_EMAIL',
+    'CONTACT_EMAIL','CONTACT_EMAIL_PASS','SUPPORT_WHATSAPP',
+    'PROMO_BANNER_ENABLED','PROMO_BANNER_TEXT','PROMO_BANNER_CODE',
+    'CURRENCY','CURRENCY_SYMBOL','MAX_DOWNLOADS','DEFAULT_MAX_DOWNLOADS',
+    'INSTAGRAM_URL','TIKTOK_URL','FACEBOOK_URL','YOUTUBE_URL','TWITTER_URL','LINKEDIN_URL',
+    'GOOGLE_ANALYTICS_ID','FACEBOOK_PIXEL_ID','TAWK_PROPERTY_ID',
+    'ALLOW_REGISTRATION','MAINTENANCE_MODE',
+    'SITE_LOGO_URL','SITE_FAVICON_URL','SITE_PRIMARY_COLOR',
+    'FOOTER_TEXT','COPYRIGHT_TEXT','META_DESCRIPTION','META_KEYWORDS',
+    'HOMEPAGE_HERO_TITLE','HOMEPAGE_HERO_SUBTITLE','FEATURED_SECTION_TITLE',
+    'SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_PASS','SMTP_FROM',
+    'TAX_ENABLED','TAX_RATE','TAX_LABEL',
+    'MAX_CART_ITEMS','FREE_TRIAL_DAYS','PDF_WATERMARK',
+    'REQUIRE_EMAIL_VERIFICATION','ORDER_NOTIFICATION_EMAIL','LOW_STOCK_ALERT',
+    'CUSTOM_HEAD_CODE','CUSTOM_FOOTER_CODE',
+    'SHOW_REVIEWS','SHOW_WISHLIST','SHOW_HOW_IT_WORKS'
+  ];
+  fields.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 
-  Object.entries(updates).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    const regex = new RegExp(`^${key}=.*$`, 'm');
-    if (regex.test(envContent)) {
-      envContent = envContent.replace(regex, `${key}=${value}`);
-    } else {
-      envContent += `\n${key}=${value}`;
-    }
-    process.env[key] = value;
-  });
+  // Handle admin password change separately (hash it)
+  if (req.body.ADMIN_PASSWORD && req.body.ADMIN_PASSWORD.trim()) {
+    const bcrypt = require('bcryptjs');
+    const hashed = bcrypt.hashSync(req.body.ADMIN_PASSWORD.trim(), 12);
+    const db = require('../database/db');
+    db.prepare('UPDATE users SET password = ? WHERE role = ?').run(hashed, 'admin');
+  }
 
-  fs.writeFileSync(envPath, envContent);
+  setSettings(updates);
+  req.session.success = '✅ Settings saved successfully!';
   res.redirect('/admin/settings?saved=1');
 });
 

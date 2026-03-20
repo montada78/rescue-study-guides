@@ -238,6 +238,12 @@ const initDB = () => {
       FOREIGN KEY (item_product_id) REFERENCES products(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS site_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Performance indexes
     CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active, is_featured);
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id, is_active);

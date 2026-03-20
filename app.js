@@ -8,6 +8,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const fs = require('fs');
+const { getSettings } = require('./database/settings');
 
 // Ensure upload directories exist (needed on Railway/fresh deployments)
 ['public/uploads/guides', 'public/uploads/images', 'database'].forEach(dir => {
@@ -121,10 +122,14 @@ app.use(session({
 
 // Global template variables
 app.use((req, res, next) => {
+  // Load site settings from DB (cached 60s)
+  const siteSettings = getSettings();
+  res.locals.settings = siteSettings;
+  res.locals.appName = siteSettings.APP_NAME || 'Rescue Study Guides';
+
   res.locals.user = req.session.user || null;
   res.locals.isLoggedIn = !!req.session.user;
   res.locals.isAdmin = req.session.user?.role === 'admin';
-  res.locals.appName = process.env.APP_NAME || 'Rescue Study Guides';
   res.locals.cartCount = 0;
   
   if (req.session.user) {
