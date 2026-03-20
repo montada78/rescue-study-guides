@@ -31,14 +31,14 @@
         <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center"><i class="fas fa-file-medical text-orange-600 text-lg"></i></div>
         <div>
           <h1 class="text-2xl font-bold text-gray-800">File Recovery Tool</h1>
-          <p class="text-sm text-gray-500">PDFs on disk with no product linked — assign them to the correct product</p>
+          <p class="text-sm text-gray-500">Click <strong>Open PDF</strong> to view the file, then pick the matching product and save</p>
         </div>
       </div>
 
       <% if (locals.success) { %>
       <div class="bg-green-50 border-l-4 border-green-500 rounded-xl p-4 mb-6 flex items-center gap-3">
         <i class="fas fa-check-circle text-green-500"></i>
-        <p class="text-green-700 font-semibold text-sm"><%= success %></p>
+        <p class="text-green-700 font-semibold text-sm"><%- success %></p>
       </div>
       <% } %>
       <% if (locals.error) { %>
@@ -51,42 +51,59 @@
       <% if (orphans.length === 0) { %>
       <div class="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
         <i class="fas fa-check-circle text-green-500 text-4xl mb-3"></i>
-        <p class="text-green-700 font-bold text-lg">All files are linked!</p>
-        <p class="text-green-600 text-sm">No orphaned PDFs found.</p>
+        <p class="text-green-700 font-bold text-lg">All files are linked! ✅</p>
+        <p class="text-green-600 text-sm">No orphaned PDFs found on disk.</p>
       </div>
       <% } else { %>
+
       <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-6 flex items-center gap-3">
         <i class="fas fa-exclamation-triangle text-orange-500"></i>
-        <p class="text-orange-700 text-sm font-medium"><strong><%= orphans.length %> orphaned PDF(s)</strong> found on disk with no product linked. Assign each to its product below.</p>
+        <p class="text-orange-700 text-sm font-medium">
+          <strong><%= orphans.length %> unlinked PDF(s)</strong> on disk.
+          <% if (autoLinked > 0) { %> <span class="text-green-700"><%= autoLinked %> were auto-linked from history.</span><% } %>
+          Open each PDF below, identify it, then link it to the correct product.
+        </p>
       </div>
 
-      <div class="space-y-4">
-        <% orphans.forEach(f => { %>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <div class="flex items-start justify-between gap-4 flex-wrap">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+      <div class="space-y-3">
+        <% orphans.forEach((f, i) => { %>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <div class="flex items-center gap-4 flex-wrap">
+
+            <!-- PDF icon + size -->
+            <div class="flex items-center gap-3 w-48 flex-shrink-0">
+              <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <i class="fas fa-file-pdf text-red-500"></i>
               </div>
-              <div class="min-w-0">
-                <p class="font-mono text-xs text-gray-500 truncate"><%= f.filename %></p>
-                <p class="text-sm font-bold text-gray-700 mt-0.5"><%= f.sizeMB %> MB</p>
+              <div>
+                <p class="text-xs font-mono text-gray-400"><%= f.filename.substring(0,8) %>...</p>
+                <p class="text-sm font-bold text-gray-700"><%= f.sizeMB %> MB</p>
               </div>
             </div>
-            <form action="/admin/file-recovery/link" method="POST" class="flex items-center gap-3 flex-wrap">
+
+            <!-- Open PDF button -->
+            <a href="<%= f.path %>" target="_blank"
+              class="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors whitespace-nowrap flex-shrink-0">
+              <i class="fas fa-eye"></i> Open PDF
+            </a>
+
+            <!-- Link form -->
+            <form action="/admin/file-recovery/link" method="POST" class="flex items-center gap-2 flex-wrap flex-1">
               <input type="hidden" name="file_path" value="<%= f.path %>">
-              <input type="text" name="file_name" placeholder="File display name e.g. SABIS Chemistry Grade 9.pdf"
-                class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-72 focus:ring-2 focus:ring-rescue-red focus:border-transparent" required>
-              <select name="product_id" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rescue-red" required>
+              <input type="text" name="file_name" value="<%= f.suggestedName || '' %>"
+                placeholder="e.g. SABIS Chemistry Grade 9.pdf"
+                class="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-48 focus:ring-2 focus:ring-rescue-red focus:border-transparent" required>
+              <select name="product_id" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rescue-red flex-shrink-0" required>
                 <option value="">— Select Product —</option>
                 <% products.forEach(p => { %>
-                <option value="<%= p.id %>"><%= p.title %></option>
+                <option value="<%= p.id %>" <%- f.suggestedProductId == p.id ? 'selected' : '' %>><%= p.title %></option>
                 <% }) %>
               </select>
-              <button type="submit" class="bg-rescue-red text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors whitespace-nowrap">
-                <i class="fas fa-link mr-1"></i> Link File
+              <button type="submit" class="bg-rescue-red text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors whitespace-nowrap flex-shrink-0">
+                <i class="fas fa-link mr-1"></i> Link
               </button>
             </form>
+
           </div>
         </div>
         <% }) %>

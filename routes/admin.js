@@ -616,16 +616,56 @@ router.get('/file-recovery', requireAdmin, (req, res) => {
   const uploadsDir = path.join(__dirname, '..', 'public', 'uploads', 'guides');
   const allFiles = fs.existsSync(uploadsDir) ? fs.readdirSync(uploadsDir).filter(f => f.endsWith('.pdf')) : [];
   const linked = new Set(db.prepare('SELECT file_path FROM product_files').all().map(r => r.file_path.split('/').pop()));
+
+  // Known file map from git history (uuid → {productId, fileName})
+  const knownMap = {
+    '6df24bc3-d0d0-47b7-ab20-719d788b110a.pdf': { productId: 11, fileName: 'AP Psychology Study Guide Part 1.pdf' },
+    'afe12e1d-7386-4616-975a-5032c4400709.pdf': { productId: 11, fileName: 'AP Psychology Study Guide Part 1 (copy).pdf' },
+    '44f2272f-0bbe-4093-a13e-149413e615e0.pdf': { productId: null, fileName: 'AP Chemistry Rescue Pack 2026.pdf' },
+    'b3523bda-9182-4451-912b-2e411afc9f64.pdf': { productId: null, fileName: 'Unit 9 Student Notes.pdf' },
+    'f049b12a-6459-42a6-908a-c68e32bdc2a7.pdf': { productId: null, fileName: '' },
+    'c32ff68e-de2c-4442-ac7f-fc6a775f8df9.pdf': { productId: null, fileName: '' },
+    '1fda47d5-527d-4c13-92d0-b23c117075b1.pdf': { productId: null, fileName: '' },
+    'ca63e51b-6c12-48aa-b990-1eec812a4f68.pdf': { productId: null, fileName: '' },
+  };
+
+  // Auto-link any known files that have both productId and fileName and product exists
+  let autoLinked = 0;
+  for (const [uuid, info] of Object.entries(knownMap)) {
+    if (!linked.has(uuid) && info.productId && info.fileName) {
+      const filePath = '/uploads/guides/' + uuid;
+      const diskPath = path.join(__dirname, '..', 'public', filePath);
+      if (fs.existsSync(diskPath)) {
+        const stat = fs.statSync(diskPath);
+        const product = db.prepare('SELECT id FROM products WHERE id = ?').get(info.productId);
+        if (product) {
+          db.prepare('INSERT OR IGNORE INTO product_files (product_id, file_path, file_name, file_size) VALUES (?, ?, ?, ?)').run(info.productId, filePath, info.fileName, stat.size);
+          linked.add(uuid);
+          autoLinked++;
+        }
+      }
+    }
+  }
+
   const orphans = allFiles
     .filter(f => !linked.has(f))
     .map(f => {
       const stat = fs.statSync(path.join(uploadsDir, f));
-      return { filename: f, size: stat.size, sizeMB: (stat.size / 1024 / 1024).toFixed(2), path: '/uploads/guides/' + f };
+      const known = knownMap[f] || {};
+      return {
+        filename: f,
+        size: stat.size,
+        sizeMB: (stat.size / 1024 / 1024).toFixed(2),
+        path: '/uploads/guides/' + f,
+        suggestedName: known.fileName || '',
+        suggestedProductId: known.productId || null
+      };
     })
-    .filter(f => f.size > 1000) // skip empty/placeholder files
+    .filter(f => f.size > 1000)
     .sort((a, b) => b.size - a.size);
+
   const products = db.prepare('SELECT id, title FROM products WHERE is_active = 1 ORDER BY title').all();
-  res.render('admin/file-recovery', { title: 'File Recovery', orphans, products });
+  res.render('admin/file-recovery', { title: 'File Recovery', orphans, products, autoLinked });
 });
 
 router.post('/file-recovery/link', requireAdmin, (req, res) => {
