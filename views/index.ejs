@@ -29,33 +29,33 @@
       <div>
         <div class="inline-flex items-center bg-red-50 border border-red-200 rounded-full px-4 py-2 text-sm font-semibold text-rescue-red mb-6">
           <span class="w-2 h-2 bg-rescue-red rounded-full mr-2 animate-pulse"></span>
-          🚨 EXAM SEASON IS HERE — Are you ready?
+          ⚗️ Chemistry Made Simple — From Confused to Confident!
         </div>
         
         <h1 class="font-display font-black text-5xl lg:text-7xl text-rescue-dark leading-tight mb-4">
-          <span class="text-rescue-red">Rescue</span><br>
-          Your Exam<br>
+          <span class="text-rescue-red">Master</span><br>
+          Chemistry<br>
           <span class="relative inline-block">
-            Results
+            Your Way
             <svg class="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" preserveAspectRatio="none">
               <path d="M0 6 Q50 0 100 5 Q150 10 200 4" stroke="#E63946" stroke-width="3" fill="none" stroke-linecap="round"/>
             </svg>
           </span>
-          Today!
+          !
         </h1>
         
         <p class="text-xl text-gray-600 mb-8 leading-relaxed max-w-lg">
-          <%= settings.HOMEPAGE_HERO_SUBTITLE || 'Beautiful, colorful, high-end revision guides designed for Gen Z students. Stop stressing, start acing. IGCSE, AP, SABIS & more. 🎯' %>
+          <%= settings.HOMEPAGE_HERO_SUBTITLE || 'High-quality Chemistry study guides for IGCSE, AP, SABIS & College. From "I Don\'t Get It" to "I Ace It" — by Mr. Hisham. ⚗️' %>
         </p>
 
         <div class="flex flex-wrap gap-4 mb-10">
           <a href="/shop" class="btn-rescue text-base px-8 py-4 shadow-xl neon-glow">
             <i class="fas fa-shopping-bag mr-2"></i>
-            Shop All Guides
+            Shop Chemistry Guides
           </a>
           <a href="/shop?free=1" class="btn-rescue-outline text-base px-8 py-4">
             <i class="fas fa-gift mr-2"></i>
-            Get FREE Guide
+            Get FREE Guide ⚗️
           </a>
         </div>
 
@@ -90,7 +90,7 @@
             <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full">⚗️ CHEMISTRY</span>
             <span class="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">IGCSE</span>
           </div>
-          <h3 class="font-display font-black text-xl mb-2">Complete Chemistry Rescue Guide</h3>
+          <h3 class="font-display font-black text-xl mb-2">IGCSE Chemistry 0620 Complete Guide</h3>
           <p class="text-white/70 text-sm mb-4">95 pages • Color-coded • Exam tips</p>
           <div class="flex items-center justify-between">
             <div>
@@ -108,8 +108,8 @@
           <div class="flex items-center gap-3 mb-3">
             <div class="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center text-2xl">🧬</div>
             <div>
-              <p class="font-bold text-sm text-gray-800">IGCSE Biology</p>
-              <p class="text-xs text-gray-500">Mega Rescue Pack</p>
+              <p class="font-bold text-sm text-gray-800">IGCSE Chemistry 0620</p>
+              <p class="text-xs text-gray-500">Complete Guide</p>
             </div>
           </div>
           <div class="flex text-yellow-400 text-xs mb-2">★★★★★</div>
@@ -173,23 +173,23 @@
 <section class="py-16 bg-gray-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-12">
-      <span class="inline-block bg-red-100 text-rescue-red text-sm font-bold px-4 py-1.5 rounded-full mb-4">📚 BROWSE BY SUBJECT</span>
-      <h2 class="font-display font-black text-4xl text-rescue-dark">Find Your Rescue Guide</h2>
-      <p class="text-gray-500 mt-2 text-lg">Pick your subject and start crushing your exams 💪</p>
+      <span class="inline-block bg-red-100 text-rescue-red text-sm font-bold px-4 py-1.5 rounded-full mb-4">📚 BROWSE BY CURRICULUM</span>
+      <h2 class="font-display font-black text-4xl text-rescue-dark">Find Your Chemistry Guide</h2>
+      <p class="text-gray-500 mt-2 text-lg">Pick your curriculum and start acing your chemistry exams 💪</p>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
       <% const subjectData = [
-        { icon: '🔢', name: 'Mathematics', slug: 'mathematics', bg: 'from-red-400 to-red-600' },
-        { icon: '🧬', name: 'Biology', slug: 'biology', bg: 'from-teal-400 to-teal-600' },
-        { icon: '⚗️', name: 'Chemistry', slug: 'chemistry', bg: 'from-orange-400 to-orange-600' },
-        { icon: '⚡', name: 'Physics', slug: 'physics', bg: 'from-blue-400 to-blue-600' },
-        { icon: '📖', name: 'English', slug: 'english', bg: 'from-purple-400 to-purple-600' },
-        { icon: '🏛️', name: 'History', slug: 'history', bg: 'from-amber-400 to-amber-600' },
-        { icon: '🌍', name: 'Geography', slug: 'geography', bg: 'from-green-400 to-green-600' },
-        { icon: '📊', name: 'Economics', slug: 'economics', bg: 'from-pink-400 to-pink-600' },
-        { icon: '💻', name: 'Computer Sci', slug: 'computer-science', bg: 'from-gray-600 to-gray-800' },
-        { icon: '🎓', name: 'Bundles', slug: 'all', bg: 'from-rescue-red to-red-700' },
+        { icon: '⚗️', name: 'IGCSE Chemistry', slug: 'igcse-chemistry', bg: 'from-orange-400 to-orange-600' },
+        { icon: '🎓', name: 'AP Chemistry', slug: 'ap-chemistry', bg: 'from-rescue-red to-red-700' },
+        { icon: '🏫', name: 'SABIS Chemistry', slug: 'sabis-chemistry', bg: 'from-blue-400 to-blue-600' },
+        { icon: '🇺🇸', name: 'American Curriculum', slug: 'american-curriculum', bg: 'from-indigo-400 to-indigo-600' },
+        { icon: '🔬', name: 'Organic Chemistry', slug: 'organic-chemistry', bg: 'from-green-400 to-green-600' },
+        { icon: '⚡', name: 'Physical Chemistry', slug: 'physical-chemistry', bg: 'from-yellow-400 to-yellow-600' },
+        { icon: '🧬', name: 'Biochemistry', slug: 'biochemistry', bg: 'from-teal-400 to-teal-600' },
+        { icon: '💊', name: 'Pharmaceutical', slug: 'pharmaceutical-chemistry', bg: 'from-purple-400 to-purple-600' },
+        { icon: '🏛️', name: 'College Chemistry', slug: 'college-chemistry', bg: 'from-pink-400 to-pink-600' },
+        { icon: '🎁', name: 'Free Resources', slug: 'free-resources', bg: 'from-green-500 to-emerald-600' },
       ]; %>
       
       <% subjectData.forEach(subj => { %>
@@ -210,7 +210,7 @@
     <div class="flex items-end justify-between mb-10">
       <div>
         <span class="inline-block bg-red-100 text-rescue-red text-sm font-bold px-4 py-1.5 rounded-full mb-3">🔥 HOT RIGHT NOW</span>
-        <h2 class="font-display font-black text-4xl text-rescue-dark">Featured Guides</h2>
+        <h2 class="font-display font-black text-4xl text-rescue-dark">Featured Chemistry Guides</h2>
       </div>
       <a href="/shop" class="btn-rescue-outline hidden sm:flex">View All <i class="fas fa-arrow-right ml-2"></i></a>
     </div>
@@ -338,9 +338,9 @@
 
     <div class="grid md:grid-cols-3 gap-8">
       <% [
-        { num: '01', icon: '🔍', title: 'Find Your Guide', desc: 'Browse by subject, curriculum (IGCSE, AP, SABIS), or level. Search for exactly what you need.' },
-        { num: '02', icon: '💳', title: 'Instant Download', desc: 'Secure checkout in seconds. Your PDF guide is instantly available in your account dashboard.' },
-        { num: '03', icon: '🚀', title: 'Ace Your Exam', desc: 'Revise with our colorful, structured guides. Built specifically to help you retain more and score higher!' },
+        { num: '01', icon: '🔍', title: 'Find Your Chemistry Guide', desc: 'Browse by curriculum (IGCSE, AP, SABIS, American) or topic. Search exactly the chemistry you need.' },
+        { num: '02', icon: '💳', title: 'Instant PDF Download', desc: 'Secure checkout in seconds. Your chemistry guide is instantly available in your account dashboard.' },
+        { num: '03', icon: '🚀', title: 'Ace Your Chemistry Exam', desc: 'Revise with colorful, structured chemistry guides by Mr. Hisham — built to help you retain more and score higher!' },
       ].forEach(step => { %>
       <div class="text-center group">
         <div class="relative inline-block mb-5">
@@ -359,7 +359,7 @@
 
     <div class="text-center mt-12">
       <a href="/auth/register" class="bg-rescue-red text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-rescue-red-dark transition-all hover:scale-105 shadow-xl inline-flex items-center">
-        🚀 Start Rescuing Now — It's Free to Join!
+        🚀 Start Learning Chemistry Now — It's Free to Join!
       </a>
     </div>
   </div>
@@ -370,18 +370,18 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-12">
       <span class="inline-block bg-yellow-100 text-yellow-700 text-sm font-bold px-4 py-1.5 rounded-full mb-4">💬 STUDENT REVIEWS</span>
-      <h2 class="font-display font-black text-4xl text-rescue-dark">What Students Say</h2>
+      <h2 class="font-display font-black text-4xl text-rescue-dark">What Chemistry Students Say</h2>
       <p class="text-gray-500 mt-2 text-lg">Real results from real students worldwide 🌍</p>
     </div>
 
     <div class="grid md:grid-cols-3 gap-6">
       <% [
-        { name: 'Sarah K.', country: '🇬🇧', school: 'IGCSE Student, UK', rating: 5, text: 'Got an A* in my IGCSE Chemistry! These guides are literally a lifesaver. The color coding made everything click instantly. 10/10 recommend!', guide: 'AP Chemistry Guide' },
-        { name: 'Ahmed M.', country: '🇦🇪', school: 'SABIS Student, Dubai', rating: 5, text: 'As a SABIS student, it\'s hard to find resources that match our curriculum. These guides are PERFECT. Passed all my tests with flying colors!', guide: 'SABIS Maths Guide' },
-        { name: 'Jessica L.', country: '🇺🇸', school: 'AP Student, USA', rating: 5, text: 'The AP Chemistry rescue guide saved my grade. The way everything is organized and color-coded makes it SO much easier to study. Worth every penny!', guide: 'AP Chemistry Guide' },
-        { name: 'Omar H.', country: '🇸🇦', school: 'IGCSE Student, KSA', rating: 5, text: 'Downloaded the Biology guide night before my exam. ACTUALLY helped me understand things I had been confused about for months. LEGENDARY! 🔥', guide: 'IGCSE Biology Guide' },
-        { name: 'Emma T.', country: '🇦🇺', school: 'High School Student, AU', rating: 5, text: 'The study guides are beautifully designed - nothing like the boring textbooks. I actually ENJOY revising now. What is happening 😂', guide: 'IGCSE Maths Guide' },
-        { name: 'Fatima A.', country: '🇪🇬', school: 'University Prep, Cairo', rating: 5, text: 'The physics formula guide is incredible! All formulas organized, explained with examples. My score jumped from 60% to 88% after using it!', guide: 'Physics Formula Guide' },
+        { name: 'Sarah K.', country: '🇬🇧', school: 'IGCSE Student, UK', rating: 5, text: 'Got an A* in my IGCSE Chemistry! Mr. Hisham\'s guide is literally a lifesaver. The color coding made everything click instantly. 10/10 recommend!', guide: 'IGCSE Chemistry 0620 Guide' },
+        { name: 'Ahmed M.', country: '🇦🇪', school: 'SABIS Student, Dubai', rating: 5, text: 'As a SABIS chemistry student it\'s hard to find good resources. These guides are PERFECT. Passed all my chem tests with flying colors!', guide: 'SABIS Chemistry Guide' },
+        { name: 'Jessica L.', country: '🇺🇸', school: 'AP Chemistry Student, USA', rating: 5, text: 'The AP Chemistry guide saved my grade. The way everything is organized and color-coded makes it SO much easier to study. Worth every penny!', guide: 'AP Chemistry Guide' },
+        { name: 'Omar H.', country: '🇸🇦', school: 'IGCSE Student, KSA', rating: 5, text: 'Downloaded the chemistry guide night before my exam. ACTUALLY helped me understand acid-base equilibria I had been confused about for months. LEGENDARY! 🔥', guide: 'IGCSE Chemistry Guide' },
+        { name: 'Emma T.', country: '🇦🇺', school: 'High School Student, AU', rating: 5, text: 'The chemistry guides are beautifully designed — nothing like boring textbooks. I actually ENJOY revising chemistry now. What is happening 😂', guide: 'College Chemistry Guide' },
+        { name: 'Fatima A.', country: '🇪🇬', school: 'Pharmaceutical Chemistry, Cairo', rating: 5, text: 'The pharmaceutical chemistry guide is incredible! Acids, bases & buffers explained with examples. My score jumped from 60% to 88% after using it!', guide: 'Pharmaceutical Chemistry Guide' },
       ].forEach(review => { %>
       <div class="testimonial-card">
         <div class="flex text-yellow-400 text-sm mb-3">
@@ -433,7 +433,7 @@
 <!-- CURRICULUMS BANNER -->
 <section class="py-10 bg-gray-50 border-y border-gray-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <p class="text-center text-gray-500 text-sm font-medium mb-6 uppercase tracking-wider">Trusted Guides for All Curriculums</p>
+    <p class="text-center text-gray-500 text-sm font-medium mb-6 uppercase tracking-wider">Chemistry Guides for All Curriculums</p>
     <div class="flex flex-wrap justify-center gap-4">
       <% ['IGCSE Cambridge', 'AP College Board', 'SABIS', 'American Curriculum', 'IB', 'Edexcel'].forEach(curr => { %>
       <a href="/shop?curriculum=<%= curr.replace(' ', '+') %>" 
