@@ -81,16 +81,16 @@ router.post('/products/new', requireAdmin, (req, res, next) => {
     next();
   });
 }, (req, res) => {
-  const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free } = req.body;
+  const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free, is_bundle } = req.body;
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
   let coverImage = null;
   if (req.files?.cover_image?.[0]) {
     coverImage = '/uploads/images/' + req.files.cover_image[0].filename;
   }
   const result = db.prepare(`
-    INSERT INTO products (title, slug, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, cover_image, is_featured, is_active, is_free, tags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags);
+    INSERT INTO products (title, slug, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, cover_image, is_featured, is_active, is_free, is_bundle, tags)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(title, slug, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null, subject, level, curriculum, parseInt(pages) || 0, coverImage, is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, is_bundle ? 1 : 0, tags);
 
   req.session.success = 'Product added! Now upload PDF files and preview images using the Upload button.';
   res.redirect('/admin/products/edit/' + result.lastInsertRowid);
@@ -121,7 +121,7 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.redirect('/admin/products');
 
-  const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free } = req.body;
+  const { title, description, short_description, category_id, price, original_price, subject, level, curriculum, pages, tags, is_featured, is_active, is_free, is_bundle } = req.body;
 
   let coverImage = product.cover_image;
   if (req.files?.cover_image?.[0]) {
@@ -131,11 +131,11 @@ router.post('/products/edit/:id', requireAdmin, (req, res, next) => {
   db.prepare(`
     UPDATE products SET title=?, description=?, short_description=?, category_id=?, price=?, original_price=?,
     subject=?, level=?, curriculum=?, pages=?, cover_image=?,
-    is_featured=?, is_active=?, is_free=?, tags=?, updated_at=CURRENT_TIMESTAMP
+    is_featured=?, is_active=?, is_free=?, is_bundle=?, tags=?, updated_at=CURRENT_TIMESTAMP
     WHERE id=?
   `).run(title, description, short_description, parseInt(category_id), parseFloat(price), parseFloat(original_price) || null,
     subject, level, curriculum, parseInt(pages) || 0, coverImage,
-    is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, tags, product.id);
+    is_featured ? 1 : 0, is_active ? 1 : 0, is_free ? 1 : 0, is_bundle ? 1 : 0, tags, product.id);
 
   req.session.success = 'Product updated successfully!';
   res.redirect('/admin/products/edit/' + product.id);
@@ -294,7 +294,22 @@ router.post('/products/delete/:id', requireAdmin, (req, res) => {
 // USERS LIST
 router.get('/users', requireAdmin, (req, res) => {
   const users = db.prepare('SELECT * FROM users ORDER BY created_at DESC').all();
-  res.render('admin/users', { title: 'Manage Users', users });
+  const products = db.prepare('SELECT id, title FROM products WHERE is_active=1 ORDER BY title').all();
+  res.render('admin/users', { title: 'Manage Users', users, products });
+});
+
+// Search users API
+router.get('/users/search', requireAdmin, (req, res) => {
+  const q = '%' + (req.query.q || '') + '%';
+  const users = db.prepare("SELECT id, name, email FROM users WHERE name LIKE ? OR email LIKE ? LIMIT 10").all(q, q);
+  res.json(users);
+});
+
+// Search products API
+router.get('/products/search-api', requireAdmin, (req, res) => {
+  const q = '%' + (req.query.q || '') + '%';
+  const products = db.prepare("SELECT id, title FROM products WHERE title LIKE ? AND is_active=1 LIMIT 10").all(q);
+  res.json(products);
 });
 
 // ORDERS LIST
@@ -317,17 +332,23 @@ router.get('/orders', requireAdmin, (req, res) => {
 
 // GRANT MANUAL DOWNLOAD ACCESS
 router.post('/grant-access', requireAdmin, (req, res) => {
-  const { user_email, product_id } = req.body;
-  
-  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(user_email);
-  if (!user) return req.session.error = 'User not found', res.redirect('/admin/users');
-  
-  db.prepare(`
-    INSERT OR IGNORE INTO downloads (user_id, product_id, download_token, max_downloads)
-    VALUES (?, ?, ?, 5)
-  `).run(user.id, parseInt(product_id), uuidv4());
+  const { user_email, product_id, max_downloads } = req.body;
+  const maxDL = parseInt(max_downloads) || 5;
 
-  req.session.success = 'Download access granted!';
+  // Support multiple product_ids (array)
+  const productIds = Array.isArray(product_id) ? product_id : [product_id];
+  const user = db.prepare('SELECT id, name FROM users WHERE email = ?').get(user_email);
+  if (!user) { req.session.error = 'User not found: ' + user_email; return res.redirect('/admin/users'); }
+
+  let count = 0;
+  productIds.forEach(pid => {
+    if (!pid) return;
+    db.prepare(`INSERT OR IGNORE INTO downloads (user_id, product_id, download_token, max_downloads) VALUES (?, ?, ?, ?)`)
+      .run(user.id, parseInt(pid), uuidv4(), maxDL);
+    count++;
+  });
+
+  req.session.success = `✅ Granted access to ${count} product(s) for ${user.name || user_email}`;
   res.redirect('/admin/users');
 });
 
@@ -362,18 +383,78 @@ router.post('/settings', requireAdmin, (req, res) => {
   const fs = require('fs');
   let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
   const updates = {
+    // Payment
     STRIPE_PUBLISHABLE_KEY: req.body.STRIPE_PUBLISHABLE_KEY,
     STRIPE_SECRET_KEY: req.body.STRIPE_SECRET_KEY,
     PAYPAL_CLIENT_ID: req.body.PAYPAL_CLIENT_ID,
     PAYPAL_CLIENT_SECRET: req.body.PAYPAL_CLIENT_SECRET,
     PAYPAL_MODE: req.body.PAYPAL_MODE,
+    // Site
     APP_URL: req.body.APP_URL,
+    APP_NAME: req.body.APP_NAME,
     ADMIN_EMAIL: req.body.ADMIN_EMAIL,
+    // Email
+    CONTACT_EMAIL: req.body.CONTACT_EMAIL,
+    CONTACT_EMAIL_PASS: req.body.CONTACT_EMAIL_PASS,
+    // Customization
+    SITE_TAGLINE: req.body.SITE_TAGLINE,
+    PROMO_BANNER_TEXT: req.body.PROMO_BANNER_TEXT,
+    PROMO_BANNER_CODE: req.body.PROMO_BANNER_CODE,
+    PROMO_BANNER_ENABLED: req.body.PROMO_BANNER_ENABLED,
+    FREE_DOWNLOAD_LIMIT: req.body.FREE_DOWNLOAD_LIMIT,
+    MAX_DOWNLOAD_ATTEMPTS: req.body.MAX_DOWNLOAD_ATTEMPTS,
+    CURRENCY: req.body.CURRENCY,
+    CURRENCY_SYMBOL: req.body.CURRENCY_SYMBOL,
+    SUPPORT_WHATSAPP: req.body.SUPPORT_WHATSAPP,
+    INSTAGRAM_URL: req.body.INSTAGRAM_URL,
+    TIKTOK_URL: req.body.TIKTOK_URL,
+    YOUTUBE_URL: req.body.YOUTUBE_URL,
+    FACEBOOK_URL: req.body.FACEBOOK_URL,
+    GOOGLE_ANALYTICS_ID: req.body.GOOGLE_ANALYTICS_ID,
+    MAINTENANCE_MODE: req.body.MAINTENANCE_MODE,
+    ALLOW_REGISTRATION: req.body.ALLOW_REGISTRATION,
+    DEFAULT_DOWNLOAD_LIMIT: req.body.DEFAULT_DOWNLOAD_LIMIT,
+    // NEW settings
+    SITE_LOGO_URL: req.body.SITE_LOGO_URL,
+    SITE_FAVICON_URL: req.body.SITE_FAVICON_URL,
+    SITE_PRIMARY_COLOR: req.body.SITE_PRIMARY_COLOR,
+    META_DESCRIPTION: req.body.META_DESCRIPTION,
+    META_KEYWORDS: req.body.META_KEYWORDS,
+    TWITTER_URL: req.body.TWITTER_URL,
+    LINKEDIN_URL: req.body.LINKEDIN_URL,
+    FOOTER_TEXT: req.body.FOOTER_TEXT,
+    COPYRIGHT_TEXT: req.body.COPYRIGHT_TEXT,
+    SMTP_HOST: req.body.SMTP_HOST,
+    SMTP_PORT: req.body.SMTP_PORT,
+    SMTP_USER: req.body.SMTP_USER,
+    SMTP_PASS: req.body.SMTP_PASS,
+    SMTP_FROM_NAME: req.body.SMTP_FROM_NAME,
+    TAX_RATE: req.body.TAX_RATE,
+    TAX_LABEL: req.body.TAX_LABEL,
+    ENABLE_TAX: req.body.ENABLE_TAX,
+    FREE_TRIAL_DAYS: req.body.FREE_TRIAL_DAYS,
+    MAX_CART_ITEMS: req.body.MAX_CART_ITEMS,
+    WATERMARK_DOWNLOADS: req.body.WATERMARK_DOWNLOADS,
+    REQUIRE_EMAIL_VERIFY: req.body.REQUIRE_EMAIL_VERIFY,
+    HOMEPAGE_HERO_TITLE: req.body.HOMEPAGE_HERO_TITLE,
+    HOMEPAGE_HERO_SUBTITLE: req.body.HOMEPAGE_HERO_SUBTITLE,
+    HOMEPAGE_HERO_BG: req.body.HOMEPAGE_HERO_BG,
+    CHAT_WIDGET_CODE: req.body.CHAT_WIDGET_CODE,
+    FACEBOOK_PIXEL_ID: req.body.FACEBOOK_PIXEL_ID,
+    TAWK_PROPERTY_ID: req.body.TAWK_PROPERTY_ID,
+    CUSTOM_HEAD_CODE: req.body.CUSTOM_HEAD_CODE,
+    CUSTOM_FOOTER_CODE: req.body.CUSTOM_FOOTER_CODE,
+    FEATURED_SECTION_TITLE: req.body.FEATURED_SECTION_TITLE,
+    HOW_IT_WORKS_ENABLED: req.body.HOW_IT_WORKS_ENABLED,
+    REVIEWS_ENABLED: req.body.REVIEWS_ENABLED,
+    WISHLIST_ENABLED: req.body.WISHLIST_ENABLED,
+    LOW_STOCK_ALERT: req.body.LOW_STOCK_ALERT,
+    ORDER_NOTIFICATION_EMAIL: req.body.ORDER_NOTIFICATION_EMAIL,
   };
   if (req.body.ADMIN_PASSWORD) updates.ADMIN_PASSWORD = req.body.ADMIN_PASSWORD;
 
   Object.entries(updates).forEach(([key, value]) => {
-    if (!value) return;
+    if (value === undefined || value === null) return;
     const regex = new RegExp(`^${key}=.*$`, 'm');
     if (regex.test(envContent)) {
       envContent = envContent.replace(regex, `${key}=${value}`);
@@ -387,6 +468,125 @@ router.post('/settings', requireAdmin, (req, res) => {
   res.redirect('/admin/settings?saved=1');
 });
 
+
+// ── ACCESS CODES MANAGEMENT ───────────────────────────────────────────────────
+
+// List access codes
+router.get('/access-codes', requireAdmin, (req, res) => {
+  const codes = db.prepare(`
+    SELECT ac.*, p.title as product_title,
+      (SELECT COUNT(*) FROM access_code_uses WHERE code_id = ac.id) as use_count
+    FROM access_codes ac
+    LEFT JOIN products p ON ac.product_id = p.id
+    ORDER BY ac.created_at DESC
+  `).all();
+  const products = db.prepare('SELECT id, title FROM products WHERE is_active=1 ORDER BY title').all();
+  res.render('admin/access-codes', { title: 'Access Codes - Admin', codes, products });
+});
+
+// Create access code
+router.post('/access-codes/create', requireAdmin, (req, res) => {
+  const { code, type, product_id, max_uses, duration_days, expires_at, note, bulk_count } = req.body;
+  const count = parseInt(bulk_count) || 1;
+
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO access_codes (code, type, product_id, max_uses, duration_days, expires_at, note)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    if (count > 1) {
+      // Bulk generate codes
+      const prefix = code || 'RSG';
+      let created = 0;
+      for (let i = 0; i < count; i++) {
+        const autoCode = prefix.toUpperCase() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        try {
+          stmt.run(autoCode, type, product_id || null, parseInt(max_uses) || 1,
+            parseInt(duration_days) || null, expires_at || null, note || '');
+          created++;
+        } catch(e) {} // skip duplicates
+      }
+      req.session.success = `✅ Generated ${created} access codes!`;
+    } else {
+      if (!code) { req.session.error = 'Code is required.'; return res.redirect('/admin/access-codes'); }
+      stmt.run(code.trim().toUpperCase(), type, product_id || null, parseInt(max_uses) || 1,
+        parseInt(duration_days) || null, expires_at || null, note || '');
+      req.session.success = `✅ Access code ${code.toUpperCase()} created!`;
+    }
+  } catch(e) {
+    req.session.error = e.message.includes('UNIQUE') ? 'Code already exists.' : e.message;
+  }
+  res.redirect('/admin/access-codes');
+});
+
+// Toggle access code active
+router.post('/access-codes/toggle/:id', requireAdmin, (req, res) => {
+  const c = db.prepare('SELECT is_active FROM access_codes WHERE id = ?').get(req.params.id);
+  if (!c) return res.json({ success: false });
+  db.prepare('UPDATE access_codes SET is_active = ? WHERE id = ?').run(c.is_active ? 0 : 1, req.params.id);
+  res.json({ success: true, active: !c.is_active });
+});
+
+// Delete access code
+router.post('/access-codes/delete/:id', requireAdmin, (req, res) => {
+  db.prepare('DELETE FROM access_codes WHERE id = ?').run(req.params.id);
+  req.session.success = 'Code deleted.';
+  res.redirect('/admin/access-codes');
+});
+
+// Edit access code
+router.post('/access-codes/edit/:id', requireAdmin, (req, res) => {
+  const { type, max_uses, duration_days, expires_at, note, product_id } = req.body;
+  db.prepare(`UPDATE access_codes SET type=?, max_uses=?, duration_days=?, expires_at=?, note=?, product_id=? WHERE id=?`)
+    .run(type, parseInt(max_uses) || 1, parseInt(duration_days) || null, expires_at || null, note || '', product_id || null, req.params.id);
+  req.session.success = 'Code updated!';
+  res.redirect('/admin/access-codes');
+});
+
+// Export codes as CSV
+router.get('/access-codes/export', requireAdmin, (req, res) => {
+  const codes = db.prepare(`
+    SELECT ac.code, ac.type, p.title as product, ac.max_uses, ac.uses_count, ac.duration_days, ac.expires_at, ac.is_active, ac.note, ac.created_at
+    FROM access_codes ac LEFT JOIN products p ON ac.product_id = p.id
+    ORDER BY ac.created_at DESC
+  `).all();
+  const csv = ['Code,Type,Product,Max Uses,Uses Count,Duration Days,Expires At,Active,Note,Created At']
+    .concat(codes.map(c => [c.code,c.type,c.product||'',c.max_uses,c.uses_count,c.duration_days||'',c.expires_at||'',c.is_active?'Yes':'No',c.note||'',c.created_at].join(','))).join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="access-codes.csv"');
+  res.send(csv);
+});
+
+// ── BUNDLE ITEMS MANAGEMENT ───────────────────────────────────────────────────
+
+// Get bundle items (API)
+router.get('/products/bundle-items/:id', requireAdmin, (req, res) => {
+  const items = db.prepare(`
+    SELECT bi.*, p.title, p.subject, p.level FROM bundle_items bi
+    JOIN products p ON bi.item_product_id = p.id
+    WHERE bi.bundle_product_id = ? ORDER BY bi.sort_order
+  `).all(req.params.id);
+  res.json(items);
+});
+
+// Add item to bundle
+router.post('/products/bundle-items/:id/add', requireAdmin, (req, res) => {
+  const { item_product_id } = req.body;
+  try {
+    const count = db.prepare('SELECT COUNT(*) as c FROM bundle_items WHERE bundle_product_id = ?').get(req.params.id).c;
+    db.prepare('INSERT OR IGNORE INTO bundle_items (bundle_product_id, item_product_id, sort_order) VALUES (?,?,?)')
+      .run(req.params.id, item_product_id, count);
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false, message: e.message }); }
+});
+
+// Remove item from bundle
+router.post('/products/bundle-items/:id/remove', requireAdmin, (req, res) => {
+  const { item_product_id } = req.body;
+  db.prepare('DELETE FROM bundle_items WHERE bundle_product_id = ? AND item_product_id = ?').run(req.params.id, item_product_id);
+  res.json({ success: true });
+});
 
 // ── COUPON MANAGEMENT ─────────────────────────────────────────────────────────
 

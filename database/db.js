@@ -68,6 +68,7 @@ const initDB = () => {
       is_featured INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
       is_free INTEGER DEFAULT 0,
+      is_bundle INTEGER DEFAULT 0,
       downloads_count INTEGER DEFAULT 0,
       rating REAL DEFAULT 0,
       rating_count INTEGER DEFAULT 0,
@@ -191,6 +192,49 @@ const initDB = () => {
   `);
 
   console.log('✅ Database tables created/verified');
+
+  // Run migrations for existing databases
+  try { db.exec('ALTER TABLE products ADD COLUMN is_bundle INTEGER DEFAULT 0'); } catch(e) {}
+
+  // Access Codes table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS access_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      type TEXT NOT NULL DEFAULT 'single' CHECK(type IN ('single','multi','unlimited','timed')),
+      product_id INTEGER DEFAULT NULL,
+      max_uses INTEGER DEFAULT 1,
+      uses_count INTEGER DEFAULT 0,
+      duration_days INTEGER DEFAULT NULL,
+      expires_at DATETIME DEFAULT NULL,
+      is_active INTEGER DEFAULT 1,
+      note TEXT DEFAULT '',
+      created_by INTEGER DEFAULT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS access_code_uses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      download_id INTEGER DEFAULT NULL,
+      FOREIGN KEY (code_id) REFERENCES access_codes(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS bundle_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bundle_product_id INTEGER NOT NULL,
+      item_product_id INTEGER NOT NULL,
+      sort_order INTEGER DEFAULT 0,
+      UNIQUE(bundle_product_id, item_product_id),
+      FOREIGN KEY (bundle_product_id) REFERENCES products(id) ON DELETE CASCADE,
+      FOREIGN KEY (item_product_id) REFERENCES products(id) ON DELETE CASCADE
+    );
+  `);
+
   seedData();
 };
 

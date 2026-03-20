@@ -14,6 +14,8 @@
       <a href="/admin/orders" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-receipt w-4 text-rescue-red"></i> Orders</a>
       <a href="/admin/users" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-rescue-red text-white"><i class="fas fa-users w-4"></i> Users</a>
       <a href="/admin/categories" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-tags w-4 text-rescue-red"></i> Categories</a>
+      <a href="/admin/coupons" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-ticket-alt w-4 text-rescue-red"></i> Coupons</a>
+      <a href="/admin/access-codes" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-key w-4 text-rescue-red"></i> Access Codes</a>
       <div class="pt-4 border-t border-gray-700 mt-4">
         <a href="/admin/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-cog w-4 text-rescue-red"></i> Settings</a>
       <a href="/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-gray-700"><i class="fas fa-external-link-alt w-4"></i> View Site</a>
@@ -29,21 +31,51 @@
 
     <!-- Grant Access Form -->
     <div class="p-8 pb-0">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-        <h3 class="font-bold text-gray-700 mb-3">🎁 Grant Manual Download Access</h3>
-        <form action="/admin/grant-access" method="POST" class="flex flex-wrap gap-3 items-end">
-          <div class="flex-1 min-w-48">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">User Email</label>
-            <input type="email" name="user_email" required placeholder="student@email.com" class="form-input py-2.5 text-sm">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 class="font-bold text-gray-700 mb-4 text-lg">🎁 Grant Manual Download Access</h3>
+        <form action="/admin/grant-access" method="POST" class="space-y-4">
+          
+          <!-- Student Search -->
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Search Student</label>
+            <div class="relative">
+              <input type="text" id="studentSearch" placeholder="Type name or email to search..." 
+                class="form-input py-2.5 text-sm w-full pr-10"
+                oninput="searchStudents(this.value)">
+              <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+            </div>
+            <div id="studentResults" class="hidden mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 relative"></div>
+            <input type="email" name="user_email" id="selectedUserEmail" required class="mt-2 form-input py-2 text-sm bg-gray-50" placeholder="Selected student email will appear here" readonly>
           </div>
-          <div class="flex-1 min-w-48">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Product</label>
-            <select name="product_id" class="form-input py-2.5 text-sm">
-              <% if (typeof products !== 'undefined') { products.forEach(p => { %><option value="<%= p.id %>"><%= p.title %></option><% }) } %>
+
+          <!-- Product Search -->
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Search & Select Products</label>
+            <div class="relative">
+              <input type="text" id="productSearch" placeholder="Type product name to search..." 
+                class="form-input py-2.5 text-sm w-full pr-10"
+                oninput="searchProducts(this.value)">
+              <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+            </div>
+            <div id="productResults" class="hidden mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 relative"></div>
+            <!-- Selected products -->
+            <div id="selectedProducts" class="mt-2 flex flex-wrap gap-2"></div>
+            <div id="selectedProductInputs"></div>
+          </div>
+
+          <!-- Max Downloads -->
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Max Downloads per Product</label>
+            <select name="max_downloads" class="form-input py-2.5 text-sm w-40">
+              <option value="3">3 downloads</option>
+              <option value="5" selected>5 downloads</option>
+              <option value="10">10 downloads</option>
+              <option value="999">Unlimited</option>
             </select>
           </div>
-          <button type="submit" class="bg-rescue-red text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-rescue-red-dark transition-colors">
-            Grant Access
+
+          <button type="submit" class="bg-rescue-red text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-red-700 transition-colors">
+            <i class="fas fa-gift mr-2"></i>Grant Access
           </button>
         </form>
       </div>
@@ -98,3 +130,80 @@
     </div>
   </main>
 </div>
+
+<script>
+// Student search
+function searchStudents(q) {
+  if (q.length < 2) { document.getElementById('studentResults').classList.add('hidden'); return; }
+  fetch('/admin/users/search?q=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(users => {
+      const div = document.getElementById('studentResults');
+      if (!users.length) { div.classList.add('hidden'); return; }
+      div.innerHTML = users.map(u => `
+        <div class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+          onclick="selectStudent('${u.email}', '${u.name}')">
+          <p class="font-semibold text-sm text-gray-800">${u.name}</p>
+          <p class="text-xs text-gray-500">${u.email}</p>
+        </div>`).join('');
+      div.classList.remove('hidden');
+    });
+}
+
+function selectStudent(email, name) {
+  document.getElementById('selectedUserEmail').value = email;
+  document.getElementById('studentSearch').value = name + ' (' + email + ')';
+  document.getElementById('studentResults').classList.add('hidden');
+}
+
+// Product search
+const selectedProductIds = new Set();
+
+function searchProducts(q) {
+  if (q.length < 2) { document.getElementById('productResults').classList.add('hidden'); return; }
+  fetch('/admin/products/search-api?q=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(products => {
+      const div = document.getElementById('productResults');
+      if (!products.length) { div.classList.add('hidden'); return; }
+      div.innerHTML = products.map(p => `
+        <div class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 flex items-center gap-2"
+          onclick="selectProduct(${p.id}, '${p.title.replace(/'/g, "\\'")}')">
+          <i class="fas fa-plus-circle text-rescue-red text-sm"></i>
+          <span class="text-sm text-gray-800">${p.title}</span>
+        </div>`).join('');
+      div.classList.remove('hidden');
+    });
+}
+
+function selectProduct(id, title) {
+  if (selectedProductIds.has(id)) return;
+  selectedProductIds.add(id);
+  // Add tag
+  const tag = document.createElement('div');
+  tag.className = 'flex items-center gap-1 bg-rescue-red/10 text-rescue-red px-3 py-1 rounded-full text-xs font-semibold';
+  tag.innerHTML = `${title} <button type="button" onclick="removeProduct(${id}, this)" class="ml-1 text-red-400 hover:text-red-600">✕</button>`;
+  tag.id = 'tag-' + id;
+  document.getElementById('selectedProducts').appendChild(tag);
+  // Add hidden input
+  const input = document.createElement('input');
+  input.type = 'hidden'; input.name = 'product_id'; input.value = id; input.id = 'input-' + id;
+  document.getElementById('selectedProductInputs').appendChild(input);
+  document.getElementById('productSearch').value = '';
+  document.getElementById('productResults').classList.add('hidden');
+}
+
+function removeProduct(id, btn) {
+  selectedProductIds.delete(id);
+  document.getElementById('tag-' + id)?.remove();
+  document.getElementById('input-' + id)?.remove();
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#studentSearch') && !e.target.closest('#studentResults'))
+    document.getElementById('studentResults').classList.add('hidden');
+  if (!e.target.closest('#productSearch') && !e.target.closest('#productResults'))
+    document.getElementById('productResults').classList.add('hidden');
+});
+</script>

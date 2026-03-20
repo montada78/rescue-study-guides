@@ -274,7 +274,39 @@
                   <span class="text-sm text-gray-700">Free Download</span>
                   <input type="checkbox" name="is_free" <%= product?.is_free ? 'checked' : '' %> class="w-5 h-5 rounded accent-rescue-red cursor-pointer">
                 </label>
+                <label class="flex items-center justify-between cursor-pointer" id="bundleToggleRow">
+                  <span class="text-sm text-gray-700">📦 Bundle (multiple guides)</span>
+                  <input type="checkbox" name="is_bundle" id="isBundleCheck" <%= product?.is_bundle ? 'checked' : '' %> class="w-5 h-5 rounded accent-rescue-red cursor-pointer" onchange="toggleBundleSection(this.checked)">
+                </label>
               </div>
+            </div>
+
+            <!-- BUNDLE ITEMS SECTION (only shown when is_bundle is checked) -->
+            <div id="bundleItemsSection" class="<%= product?.is_bundle ? '' : 'hidden' %> bg-white rounded-2xl shadow-sm border border-blue-100 p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-layer-group text-blue-600"></i></div>
+                <div>
+                  <h3 class="font-bold text-gray-800">📦 Bundle Contents</h3>
+                  <p class="text-xs text-gray-500">Add the individual guides included in this bundle</p>
+                </div>
+              </div>
+              <% if (product) { %>
+              <!-- Search and add -->
+              <div class="flex gap-2 mb-4">
+                <div class="relative flex-1">
+                  <input type="text" id="bundleItemSearch" placeholder="Search product to add..." class="form-input text-sm pr-10 w-full"
+                    oninput="searchBundleItems(this.value)">
+                  <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                </div>
+              </div>
+              <div id="bundleItemResults" class="hidden mb-3 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 relative"></div>
+              <!-- Current bundle items -->
+              <div id="bundleItemsList" class="space-y-2">
+                <p class="text-xs text-gray-400">Loading bundle items...</p>
+              </div>
+              <% } else { %>
+              <p class="text-sm text-gray-400 italic">Save the product first, then come back to add bundle items.</p>
+              <% } %>
             </div>
 
             <!-- Submit -->
@@ -316,4 +348,91 @@ function deletePreview(prevId, rowId) {
       else alert('Could not delete preview');
     });
 }
+
+// Bundle items management
+const PRODUCT_ID = '<%= product?.id || "" %>';
+
+function toggleBundleSection(checked) {
+  document.getElementById('bundleItemsSection').classList.toggle('hidden', !checked);
+  if (checked && PRODUCT_ID) loadBundleItems();
+}
+
+function loadBundleItems() {
+  if (!PRODUCT_ID) return;
+  fetch('/admin/products/bundle-items/' + PRODUCT_ID)
+    .then(r => r.json())
+    .then(items => {
+      const list = document.getElementById('bundleItemsList');
+      if (!list) return;
+      if (!items.length) {
+        list.innerHTML = '<p class="text-sm text-gray-400 italic">No items in this bundle yet. Search above to add guides.</p>';
+        return;
+      }
+      list.innerHTML = items.map(item => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl" id="bi-${item.item_product_id}">
+          <div>
+            <p class="font-semibold text-sm text-gray-800">${item.title}</p>
+            <p class="text-xs text-gray-400">${item.subject} · ${item.level}</p>
+          </div>
+          <button type="button" onclick="removeBundleItem(${item.item_product_id})"
+            class="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">
+            <i class="fas fa-times mr-1"></i>Remove
+          </button>
+        </div>
+      `).join('');
+    });
+}
+
+function searchBundleItems(q) {
+  if (q.length < 2) { document.getElementById('bundleItemResults').classList.add('hidden'); return; }
+  fetch('/admin/products/search-api?q=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(products => {
+      const div = document.getElementById('bundleItemResults');
+      const filtered = products.filter(p => p.id != PRODUCT_ID);
+      if (!filtered.length) { div.classList.add('hidden'); return; }
+      div.innerHTML = filtered.map(p => `
+        <div class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 flex items-center gap-2"
+          onclick="addBundleItem(${p.id}, '${p.title.replace(/'/g, "\\'")}')">
+          <i class="fas fa-plus-circle text-rescue-red text-sm"></i>
+          <span class="text-sm text-gray-800">${p.title}</span>
+        </div>`).join('');
+      div.classList.remove('hidden');
+    });
+}
+
+function addBundleItem(itemId, title) {
+  fetch('/admin/products/bundle-items/' + PRODUCT_ID + '/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item_product_id: itemId })
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      loadBundleItems();
+      document.getElementById('bundleItemSearch').value = '';
+      document.getElementById('bundleItemResults').classList.add('hidden');
+    }
+  });
+}
+
+function removeBundleItem(itemId) {
+  fetch('/admin/products/bundle-items/' + PRODUCT_ID + '/remove', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item_product_id: itemId })
+  }).then(r => r.json()).then(d => {
+    if (d.success) document.getElementById('bi-' + itemId)?.remove();
+  });
+}
+
+// Load bundle items on page load if bundle checkbox is checked
+if (document.getElementById('isBundleCheck')?.checked && PRODUCT_ID) {
+  loadBundleItems();
+}
+
+// Close bundle search on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#bundleItemSearch') && !e.target.closest('#bundleItemResults'))
+    document.getElementById('bundleItemResults')?.classList.add('hidden');
+});
 </script>

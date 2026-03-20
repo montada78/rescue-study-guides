@@ -1,0 +1,376 @@
+<!-- Admin Access Codes -->
+<div class="flex min-h-screen bg-gray-100">
+  <aside class="w-60 bg-rescue-dark text-white flex-shrink-0">
+    <div class="p-5 border-b border-gray-700">
+      <div class="flex items-center gap-3">
+        <svg width="36" height="36" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="#E63946" stroke-width="4"/><path d="M50 2 A48 48 0 0 1 98 50 L78 50 A28 28 0 0 0 50 22 Z" fill="#E63946"/><path d="M98 50 A48 48 0 0 1 50 98 L50 78 A28 28 0 0 0 78 50 Z" fill="#E63946"/><path d="M50 98 A48 48 0 0 1 2 50 L22 50 A28 28 0 0 0 50 78 Z" fill="#E63946"/><path d="M2 50 A48 48 0 0 1 50 2 L50 22 A28 28 0 0 0 22 50 Z" fill="#E63946"/><circle cx="50" cy="50" r="18" fill="white"/><text x="50" y="56" text-anchor="middle" font-size="14" font-weight="bold" fill="#E63946">RSG</text></svg>
+        <div><p class="font-display font-black text-sm text-rescue-red">RESCUE</p><p class="text-xs text-gray-400">Admin Panel</p></div>
+      </div>
+    </div>
+    <nav class="p-4 space-y-1">
+      <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-tachometer-alt w-4 text-rescue-red"></i> Dashboard</a>
+      <a href="/admin/products" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-book w-4 text-rescue-red"></i> Products</a>
+      <a href="/admin/products/new" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-plus-circle w-4 text-green-400"></i> Add Guide</a>
+      <a href="/admin/orders" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-receipt w-4 text-rescue-red"></i> Orders</a>
+      <a href="/admin/users" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-users w-4 text-rescue-red"></i> Users</a>
+      <a href="/admin/categories" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-tags w-4 text-rescue-red"></i> Categories</a>
+      <a href="/admin/coupons" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rescue-red/20 text-gray-300"><i class="fas fa-ticket-alt w-4 text-rescue-red"></i> Coupons</a>
+      <a href="/admin/access-codes" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-rescue-red text-white"><i class="fas fa-key w-4"></i> Access Codes</a>
+      <div class="pt-4 border-t border-gray-700 mt-4">
+        <a href="/admin/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-gray-700"><i class="fas fa-cog w-4"></i> Settings</a>
+        <a href="/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-gray-700"><i class="fas fa-external-link-alt w-4"></i> View Site</a>
+        <a href="/auth/logout" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-red-400"><i class="fas fa-sign-out-alt w-4"></i> Logout</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="flex-1 overflow-auto">
+    <div class="bg-white shadow-sm px-8 py-4 flex items-center justify-between">
+      <h1 class="font-display font-bold text-xl text-gray-800">🔑 Access Codes</h1>
+      <div class="flex gap-3">
+        <a href="/admin/access-codes/export" class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50">
+          <i class="fas fa-download"></i> Export CSV
+        </a>
+        <button onclick="document.getElementById('createModal').classList.remove('hidden')"
+          class="flex items-center gap-2 bg-rescue-red text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-700">
+          <i class="fas fa-plus"></i> New Code
+        </button>
+      </div>
+    </div>
+
+    <div class="p-8 space-y-6">
+
+      <% if (locals.success || (typeof req !== 'undefined' && req.session?.success)) { %>
+      <div class="bg-green-50 border-l-4 border-green-500 rounded-xl p-4 text-green-700 font-semibold text-sm">
+        ✅ <%= locals.success || req.session?.success %>
+      </div>
+      <% } %>
+      <% if (locals.error || (typeof req !== 'undefined' && req.session?.error)) { %>
+      <div class="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 text-red-700 font-semibold text-sm">
+        ❌ <%= locals.error || req.session?.error %>
+      </div>
+      <% } %>
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+          <p class="text-3xl font-black text-rescue-red"><%= codes.length %></p>
+          <p class="text-xs text-gray-500 mt-1 font-semibold">Total Codes</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+          <p class="text-3xl font-black text-green-600"><%= codes.filter(c => c.is_active).length %></p>
+          <p class="text-xs text-gray-500 mt-1 font-semibold">Active</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+          <p class="text-3xl font-black text-blue-600"><%= codes.reduce((a,c) => a + (c.use_count||0), 0) %></p>
+          <p class="text-xs text-gray-500 mt-1 font-semibold">Total Uses</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+          <p class="text-3xl font-black text-purple-600"><%= codes.filter(c => c.type === 'unlimited').length %></p>
+          <p class="text-xs text-gray-500 mt-1 font-semibold">Unlimited</p>
+        </div>
+      </div>
+
+      <!-- Code Types Legend -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-gray-700 mb-4">📖 Code Types Guide</h3>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="bg-blue-50 rounded-xl p-4">
+            <span class="text-blue-600 font-bold text-sm">🔹 Single Use</span>
+            <p class="text-xs text-gray-600 mt-1">One student, one time. Perfect for a single student's purchase grant.</p>
+          </div>
+          <div class="bg-green-50 rounded-xl p-4">
+            <span class="text-green-600 font-bold text-sm">🔹 Multi-Use</span>
+            <p class="text-xs text-gray-600 mt-1">Set a fixed number of uses. Great for classroom groups or school licenses.</p>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-4">
+            <span class="text-purple-600 font-bold text-sm">🔹 Unlimited</span>
+            <p class="text-xs text-gray-600 mt-1">No use limit. Use for campaigns, social media promos or free guides.</p>
+          </div>
+          <div class="bg-orange-50 rounded-xl p-4">
+            <span class="text-orange-600 font-bold text-sm">🔹 Timed</span>
+            <p class="text-xs text-gray-600 mt-1">Access expires after N days from first use. Good for trial access.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Codes table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="font-bold text-gray-800">All Access Codes (<%= codes.length %>)</h3>
+          <input type="text" id="codeFilter" placeholder="Filter codes..." oninput="filterCodes(this.value)"
+            class="form-input py-2 text-sm w-48">
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="codesTable">
+            <thead class="bg-gray-50">
+              <tr class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                <th class="px-6 py-4">Code</th>
+                <th class="px-4 py-4">Type</th>
+                <th class="px-4 py-4">Product</th>
+                <th class="px-4 py-4">Uses</th>
+                <th class="px-4 py-4">Duration</th>
+                <th class="px-4 py-4">Expires</th>
+                <th class="px-4 py-4">Status</th>
+                <th class="px-4 py-4">Note</th>
+                <th class="px-4 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50" id="codesBody">
+              <% codes.forEach(c => { %>
+              <tr class="hover:bg-gray-50 transition-colors code-row">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <code class="font-mono font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded-lg text-xs"><%= c.code %></code>
+                    <button onclick="copyCode('<%= c.code %>')" class="text-gray-400 hover:text-gray-600" title="Copy">
+                      <i class="fas fa-copy text-xs"></i>
+                    </button>
+                  </div>
+                </td>
+                <td class="px-4 py-4">
+                  <span class="px-2 py-1 rounded-full text-xs font-bold
+                    <%= c.type === 'single' ? 'bg-blue-100 text-blue-700' : c.type === 'multi' ? 'bg-green-100 text-green-700' : c.type === 'unlimited' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700' %>">
+                    <%= c.type %>
+                  </span>
+                </td>
+                <td class="px-4 py-4 text-gray-600 text-xs max-w-[160px] truncate">
+                  <%= c.product_title || '<span class="text-gray-400">All Products</span>' %>
+                </td>
+                <td class="px-4 py-4 text-center">
+                  <span class="font-bold text-gray-800"><%= c.use_count || 0 %></span>
+                  <span class="text-gray-400"> / </span>
+                  <span class="text-gray-500"><%= c.type === 'unlimited' ? '∞' : c.max_uses %></span>
+                </td>
+                <td class="px-4 py-4 text-gray-500 text-xs">
+                  <%= c.duration_days ? c.duration_days + ' days' : '—' %>
+                </td>
+                <td class="px-4 py-4 text-gray-500 text-xs">
+                  <%= c.expires_at ? new Date(c.expires_at).toLocaleDateString() : '—' %>
+                </td>
+                <td class="px-4 py-4">
+                  <button onclick="toggleCode(<%= c.id %>, this)"
+                    class="px-2.5 py-1 rounded-full text-xs font-bold <%= c.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+                    <%= c.is_active ? '✅ Active' : '❌ Off' %>
+                  </button>
+                </td>
+                <td class="px-4 py-4 text-gray-500 text-xs max-w-[120px] truncate"><%= c.note || '—' %></td>
+                <td class="px-4 py-4">
+                  <div class="flex items-center gap-2">
+                    <button onclick="openEditModal(<%= JSON.stringify(c) %>)"
+                      class="text-blue-500 hover:text-blue-700 text-xs font-semibold"><i class="fas fa-edit"></i></button>
+                    <form action="/admin/access-codes/delete/<%= c.id %>" method="POST" onsubmit="return confirm('Delete code <%= c.code %>?')" class="inline">
+                      <button type="submit" class="text-red-400 hover:text-red-600 text-xs"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+              <% if (!codes.length) { %>
+              <tr><td colspan="9" class="px-6 py-12 text-center text-gray-400">
+                <i class="fas fa-key text-4xl mb-3 block text-gray-200"></i>
+                No access codes yet. Create your first one!
+              </td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- CREATE MODAL -->
+<div id="createModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-gray-100">
+      <h3 class="font-bold text-gray-800 text-lg">🔑 Create Access Code</h3>
+      <button onclick="document.getElementById('createModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+    <form action="/admin/access-codes/create" method="POST" class="p-6 space-y-4">
+      
+      <!-- Bulk or single toggle -->
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="mode" value="single" checked onchange="toggleBulkMode(false)" class="accent-rescue-red"> Single Code
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="mode" value="bulk" onchange="toggleBulkMode(true)" class="accent-rescue-red"> Bulk Generate
+        </label>
+      </div>
+
+      <div id="singleCodeField">
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Code</label>
+        <input type="text" name="code" placeholder="RSG-RESCUE2024" class="form-input text-sm font-mono" style="text-transform:uppercase">
+        <p class="text-xs text-gray-400 mt-1">Leave blank in bulk mode for auto-generation</p>
+      </div>
+
+      <div id="bulkField" class="hidden">
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Code Prefix (for bulk)</label>
+        <input type="text" name="code" id="bulkPrefixInput" placeholder="RSG" class="form-input text-sm font-mono" style="text-transform:uppercase">
+        <label class="block text-xs font-bold text-gray-600 mb-1 mt-3 uppercase tracking-wide">How Many Codes to Generate</label>
+        <input type="number" name="bulk_count" value="10" min="1" max="500" class="form-input text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Code Type</label>
+        <select name="type" id="codeType" onchange="updateTypeUI(this.value)" class="form-input text-sm">
+          <option value="single">🔹 Single Use — one student, one time</option>
+          <option value="multi">🔹 Multi-Use — set max uses (e.g. 30 students)</option>
+          <option value="unlimited">🔹 Unlimited — no use limit</option>
+          <option value="timed">🔹 Timed — expires N days after first use</option>
+        </select>
+      </div>
+
+      <div id="maxUsesField">
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Max Uses</label>
+        <input type="number" name="max_uses" value="1" min="1" class="form-input text-sm">
+        <p class="text-xs text-gray-400 mt-1">Ignored for unlimited type</p>
+      </div>
+
+      <div id="durationField" class="hidden">
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Access Duration (days after first use)</label>
+        <input type="number" name="duration_days" value="30" min="1" class="form-input text-sm" placeholder="e.g. 30">
+        <p class="text-xs text-gray-400 mt-1">e.g. 30 = access expires 30 days after the student first uses this code</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Product (optional — leave blank for any product)</label>
+        <select name="product_id" class="form-input text-sm">
+          <option value="">— Any Product / Manual Grant —</option>
+          <% products.forEach(p => { %>
+          <option value="<%= p.id %>"><%= p.title %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Global Expiry Date (optional)</label>
+        <input type="datetime-local" name="expires_at" class="form-input text-sm">
+        <p class="text-xs text-gray-400 mt-1">Code stops working after this date regardless of uses</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Internal Note</label>
+        <input type="text" name="note" placeholder="e.g. For Dubai School Group B — March 2026" class="form-input text-sm">
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 bg-rescue-red text-white py-3 rounded-xl font-bold hover:bg-red-700 transition-colors">
+          <i class="fas fa-key mr-2"></i>Create Code
+        </button>
+        <button type="button" onclick="document.getElementById('createModal').classList.add('hidden')"
+          class="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-gray-100">
+      <h3 class="font-bold text-gray-800 text-lg">✏️ Edit Access Code: <span id="editCodeLabel"></span></h3>
+      <button onclick="document.getElementById('editModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+    <form id="editForm" action="" method="POST" class="p-6 space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Type</label>
+        <select name="type" id="editType" class="form-input text-sm">
+          <option value="single">Single Use</option>
+          <option value="multi">Multi-Use</option>
+          <option value="unlimited">Unlimited</option>
+          <option value="timed">Timed</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Max Uses</label>
+        <input type="number" name="max_uses" id="editMaxUses" min="1" class="form-input text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Duration (days after first use)</label>
+        <input type="number" name="duration_days" id="editDurationDays" min="1" class="form-input text-sm" placeholder="Leave blank for no duration limit">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Global Expiry Date</label>
+        <input type="datetime-local" name="expires_at" id="editExpiresAt" class="form-input text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Product</label>
+        <select name="product_id" id="editProductId" class="form-input text-sm">
+          <option value="">— Any Product —</option>
+          <% products.forEach(p => { %>
+          <option value="<%= p.id %>"><%= p.title %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Internal Note</label>
+        <input type="text" name="note" id="editNote" placeholder="e.g. School group, campaign..." class="form-input text-sm">
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 bg-rescue-red text-white py-3 rounded-xl font-bold hover:bg-red-700 transition-colors">
+          <i class="fas fa-save mr-2"></i>Save Changes
+        </button>
+        <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')"
+          class="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => {
+    const msg = document.createElement('div');
+    msg.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-xl text-sm z-50';
+    msg.textContent = 'Copied: ' + code;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 2000);
+  });
+}
+
+function toggleCode(id, btn) {
+  fetch('/admin/access-codes/toggle/' + id, { method: 'POST' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        btn.className = 'px-2.5 py-1 rounded-full text-xs font-bold ' + (d.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500');
+        btn.textContent = d.active ? '✅ Active' : '❌ Off';
+      }
+    });
+}
+
+function filterCodes(q) {
+  const rows = document.querySelectorAll('.code-row');
+  q = q.toLowerCase();
+  rows.forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function toggleBulkMode(isBulk) {
+  document.getElementById('singleCodeField').classList.toggle('hidden', isBulk);
+  document.getElementById('bulkField').classList.toggle('hidden', !isBulk);
+}
+
+function updateTypeUI(type) {
+  document.getElementById('durationField').classList.toggle('hidden', type !== 'timed');
+  document.getElementById('maxUsesField').classList.toggle('hidden', type === 'unlimited' || type === 'single');
+}
+
+function openEditModal(code) {
+  document.getElementById('editCodeLabel').textContent = code.code;
+  document.getElementById('editForm').action = '/admin/access-codes/edit/' + code.id;
+  document.getElementById('editType').value = code.type;
+  document.getElementById('editMaxUses').value = code.max_uses || 1;
+  document.getElementById('editDurationDays').value = code.duration_days || '';
+  document.getElementById('editExpiresAt').value = code.expires_at ? code.expires_at.replace(' ','T').substring(0,16) : '';
+  document.getElementById('editProductId').value = code.product_id || '';
+  document.getElementById('editNote').value = code.note || '';
+  document.getElementById('editModal').classList.remove('hidden');
+}
+</script>
