@@ -371,6 +371,25 @@ router.get('/settings', requireAdmin, (req, res) => {
   const envPath = require('path').join(__dirname, '..', '.env');
   const envContent = require('fs').existsSync(envPath) ? require('fs').readFileSync(envPath, 'utf8') : '';
   const settings = {};
+  // Start with process.env values (covers Railway env vars)
+  const knownKeys = [
+    'STRIPE_PUBLISHABLE_KEY','STRIPE_SECRET_KEY','PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_MODE',
+    'APP_NAME','APP_URL','SITE_TAGLINE','PROMO_BANNER_ENABLED','PROMO_BANNER_TEXT','PROMO_BANNER_CODE',
+    'CONTACT_EMAIL','CONTACT_EMAIL_PASS','SUPPORT_WHATSAPP',
+    'INSTAGRAM_URL','TIKTOK_URL','FACEBOOK_URL','YOUTUBE_URL','TWITTER_URL','LINKEDIN_URL',
+    'CURRENCY','CURRENCY_SYMBOL','MAX_DOWNLOADS','DEFAULT_MAX_DOWNLOADS',
+    'GOOGLE_ANALYTICS_ID','ADMIN_EMAIL','ALLOW_REGISTRATION','MAINTENANCE_MODE',
+    'SITE_LOGO_URL','SITE_FAVICON_URL','SITE_PRIMARY_COLOR','FOOTER_TEXT','COPYRIGHT_TEXT',
+    'META_DESCRIPTION','META_KEYWORDS','FACEBOOK_PIXEL_ID','TAWK_PROPERTY_ID',
+    'HOMEPAGE_HERO_TITLE','HOMEPAGE_HERO_SUBTITLE','FEATURED_SECTION_TITLE',
+    'SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_PASS','SMTP_FROM',
+    'TAX_ENABLED','TAX_RATE','TAX_LABEL','MAX_CART_ITEMS','FREE_TRIAL_DAYS',
+    'PDF_WATERMARK','REQUIRE_EMAIL_VERIFICATION','ORDER_NOTIFICATION_EMAIL','LOW_STOCK_ALERT',
+    'CUSTOM_HEAD_CODE','CUSTOM_FOOTER_CODE',
+    'SHOW_REVIEWS','SHOW_WISHLIST','SHOW_HOW_IT_WORKS'
+  ];
+  knownKeys.forEach(k => { if (process.env[k] !== undefined) settings[k] = process.env[k]; });
+  // Then override with .env file (local dev)
   envContent.split('\n').forEach(line => {
     const [key, ...val] = line.split('=');
     if (key && !key.startsWith('#')) settings[key.trim()] = val.join('=').trim();

@@ -128,13 +128,14 @@ app.use((req, res, next) => {
   res.locals.cartCount = 0;
   
   if (req.session.user) {
-    const cartCount = db.prepare('SELECT COUNT(*) as count FROM cart WHERE user_id = ?')
-                       .get(req.session.user.id);
+    const uid = req.session.user.id;
+    // Cache cart+wishlist counts per user for 30 seconds to reduce DB load
+    const cartCount = cached('cart_' + uid, 30000, () =>
+      db.prepare('SELECT COUNT(*) as count FROM cart WHERE user_id = ?').get(uid));
     res.locals.cartCount = cartCount?.count || 0;
-    
-    const wishlistCount = db.prepare('SELECT COUNT(*) as count FROM wishlist WHERE user_id = ?')
-                           .get(req.session.user.id);
-    res.locals.wishlistCount = wishlistCount?.count || 0;
+    const wishCount = cached('wish_' + uid, 30000, () =>
+      db.prepare('SELECT COUNT(*) as count FROM wishlist WHERE user_id = ?').get(uid));
+    res.locals.wishlistCount = wishCount?.count || 0;
   }
   
   res.locals.success = req.session.success || null;
@@ -153,6 +154,9 @@ const downloadRoutes = require('./routes/downloads');
 const accountRoutes = require('./routes/account');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payment');
+
+// Keep-alive ping endpoint (prevents Railway free-tier sleep)
+app.get('/ping', (req, res) => res.send('OK'));
 
 app.use('/', storeRoutes);
 app.use('/auth', authRoutes);

@@ -81,9 +81,9 @@ router.get('/shop', (req, res) => {
     ${where} ${orderBy} LIMIT ? OFFSET ?
   `).all(...params, limit, offset);
 
-  const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
-  const levels = db.prepare('SELECT DISTINCT level FROM products WHERE is_active = 1').all();
-  const curriculums = db.prepare('SELECT DISTINCT curriculum FROM products WHERE is_active = 1').all();
+  const categories = dbCached('shop_cats', 300000, () => db.prepare('SELECT * FROM categories ORDER BY name').all());
+  const levels = dbCached('shop_levels', 300000, () => db.prepare('SELECT DISTINCT level FROM products WHERE is_active = 1').all());
+  const curriculums = dbCached('shop_curriculums', 300000, () => db.prepare('SELECT DISTINCT curriculum FROM products WHERE is_active = 1').all());
 
   res.render('shop', {
     title: 'Shop - Rescue Study Guides',

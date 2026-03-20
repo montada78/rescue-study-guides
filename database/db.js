@@ -14,6 +14,10 @@ const db = new Database(dbPath);
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.pragma('cache_size = -8000');   // 8MB page cache
+db.pragma('synchronous = NORMAL'); // Faster writes, still crash-safe
+db.pragma('temp_store = MEMORY');  // Keep temp tables in RAM
+db.pragma('mmap_size = 67108864'); // 64MB memory-mapped I/O
 
 // Create tables
 const initDB = () => {
@@ -233,6 +237,21 @@ const initDB = () => {
       FOREIGN KEY (bundle_product_id) REFERENCES products(id) ON DELETE CASCADE,
       FOREIGN KEY (item_product_id) REFERENCES products(id) ON DELETE CASCADE
     );
+
+    -- Performance indexes
+    CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active, is_featured);
+    CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id, is_active);
+    CREATE INDEX IF NOT EXISTS idx_products_price ON products(price, is_active);
+    CREATE INDEX IF NOT EXISTS idx_downloads_user ON downloads(user_id, product_id);
+    CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id, status);
+    CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_cart_user ON cart(user_id);
+    CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id);
+    CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id, is_approved);
+    CREATE INDEX IF NOT EXISTS idx_product_files_product ON product_files(product_id);
+    CREATE INDEX IF NOT EXISTS idx_product_previews_product ON product_previews(product_id);
+    CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
+    CREATE INDEX IF NOT EXISTS idx_access_codes_code ON access_codes(code);
   `);
 
   seedData();
@@ -241,7 +260,7 @@ const initDB = () => {
 // Seed initial data
 const seedData = () => {
   const existingCategories = db.prepare('SELECT COUNT(*) as count FROM categories').get();
-  if (existingCategories.count > 0) return;
+  if (existingCategories.count > 0) return;  // DB already seeded, never overwrite
 
   // Insert categories
   const insertCategory = db.prepare(`
@@ -297,5 +316,19 @@ const seedData = () => {
 };
 
 initDB();
+
+// Startup integrity check — warn if product files are missing from DB
+const integrityCheck = () => {
+  try {
+    const prodCount = db.prepare('SELECT COUNT(*) as n FROM products').get().n;
+    const fileCount = db.prepare('SELECT COUNT(*) as n FROM product_files').get().n;
+    const prevCount = db.prepare('SELECT COUNT(*) as n FROM product_previews').get().n;
+    console.log(`📊 DB integrity: ${prodCount} products | ${fileCount} product_files | ${prevCount} product_previews`);
+    if (prodCount > 10 && fileCount === 0) {
+      console.warn('⚠️  WARNING: product_files table is empty but products exist! Uploaded files may have been lost.');
+    }
+  } catch(e) { /* non-fatal */ }
+};
+integrityCheck();
 
 module.exports = db;
